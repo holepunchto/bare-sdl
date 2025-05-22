@@ -30,6 +30,21 @@ jobs:
       - run: |
           sudo apt update
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'android' }}
+      - run: |
+          sudo apt-get install -y \
+            libx11-dev \
+            libxext-dev \
+            libxrandr-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxfixes-dev \
+            libwayland-dev \
+            libdrm-dev \
+            libgbm-dev \
+            libudev-dev \
+            libasound2-dev
+        if: ${{ matrix.platform == 'linux' || matrix.platform == 'android' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}
