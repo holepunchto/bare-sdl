@@ -1,0 +1,43 @@
+{
+  "name": "bare-sdl",
+  "version": "0.0.0",
+  "description": "Bare binding for SDL",
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./package": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "binding.c",
+    "binding.js",
+    "CMakeLists.txt",
+    "lib",
+    "prebuilds"
+  ],
+  "addon": true,
+  "scripts": {
+    "test": "prettier . --check && bare test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holepunchto/bare-sdl.git"
+  },
+  "author": "Holepunch",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holepunchto/bare-sdl/issues"
+  },
+  "homepage": "https://github.com/holepunchto/bare-sdl#readme",
+  "engines": {
+    "bare": ">=1.14.0"
+  },
+  "devDependencies": {
+    "brittle": "^3.1.1",
+    "cmake-bare": "^1.1.6",
+    "cmake-ports": "1.4.6",
+    "prettier": "^3.4.2",
+    "prettier-config-standard": "^7.0.0"
+  }
+}
