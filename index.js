@@ -1,1 +1,1 @@
-exports.constants = require("./lib/constants");
+exports.constants = require('./lib/constants')
