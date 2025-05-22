@@ -18,7 +18,7 @@
   ],
   "addon": true,
   "scripts": {
-    "test": "prettier . --check && bare test.js"
+    "test": "prettier . --check --list-different && bare test.js"
   },
   "repository": {
     "type": "git",
