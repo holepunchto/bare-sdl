@@ -37,13 +37,8 @@ jobs:
             libxrandr-dev \
             libxcursor-dev \
             libxi-dev \
-            libxinerama-dev \
             libxfixes-dev \
             libwayland-dev \
-            libdrm-dev \
-            libgbm-dev \
-            libudev-dev \
-            libasound2-dev
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'android' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
