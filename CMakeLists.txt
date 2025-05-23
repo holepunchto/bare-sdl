@@ -3,16 +3,14 @@ cmake_minimum_required(VERSION 3.25)
 find_package(cmake-bare REQUIRED PATHS node_modules/cmake-bare)
 find_package(cmake-fetch REQUIRED PATHS node_modules/cmake-fetch)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
-endif()
-
 project(bare_sdl C CXX)
 
 set(SDL3_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
 set(SDL3_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL3_STATIC ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 fetch_package("github:holepunchto/libjstl#d92f140c")
 fetch_package("github:libsdl-org/SDL#main")
