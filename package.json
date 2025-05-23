@@ -39,5 +39,8 @@
     "cmake-ports": "1.4.6",
     "prettier": "^3.5.3",
     "prettier-config-standard": "^7.0.0"
+  },
+  "dependencies": {
+    "cmake-fetch": "^1.4.6"
   }
 }
