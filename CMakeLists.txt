@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.25)
 find_package(cmake-bare REQUIRED PATHS node_modules/cmake-bare)
 find_package(cmake-fetch REQUIRED PATHS node_modules/cmake-fetch)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 project(bare_sdl C CXX)
 
 set(SDL3_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
