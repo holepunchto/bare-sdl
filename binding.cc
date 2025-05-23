@@ -1,6 +1,4 @@
-#include "SDL3/SDL_video.h"
 #include <bare.h>
-#include <cstdint>
 #include <js.h>
 #include <jstl.h>
 
@@ -26,13 +24,28 @@ bare_sdl_create_window(
   assert(err == 0);
 
   bare_sdl_window_t *win;
-  err = js_create_arraybuffer(env, sizeof(bare_sdl_window_t), win, handle);
+  err = js_create_arraybuffer(env, win, handle);
   assert(err == 0);
 
   win->handle = SDL_CreateWindow(value.c_str(), width, height, 0);
   assert(win->handle != nullptr);
 
   return handle;
+}
+
+static void
+bare_sdl_destroy_window(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_t handle
+) {
+  int err;
+
+  bare_sdl_window_t *win;
+  err = js_get_arraybuffer_info(env, handle, win);
+  assert(err == 0);
+
+  SDL_DestroyWindow(win->handle);
 }
 
 static js_value_t *
@@ -54,6 +67,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V_UINT32("SDL_WINDOWPOS_CENTERED", SDL_WINDOWPOS_CENTERED)
 
   V_FUNCTION("createWindow", bare_sdl_create_window)
+  V_FUNCTION("destroyWindow", bare_sdl_destroy_window)
 
 #undef V_UINT32
 #undef V_FUNCTION
