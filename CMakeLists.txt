@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 find_package(cmake-bare REQUIRED PATHS node_modules/cmake-bare)
 find_package(cmake-fetch REQUIRED PATHS node_modules/cmake-fetch)
 
-project(bare_sdl C)
+project(bare_sdl C CXX)
 
 set(SDL3_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
 set(SDL3_SHARED OFF CACHE BOOL "" FORCE)
@@ -18,7 +18,7 @@ add_bare_module(bare_sdl)
 target_sources(
   ${bare_sdl}
   PRIVATE
-    binding.c
+    binding.cc
 )
 
 target_link_libraries(
