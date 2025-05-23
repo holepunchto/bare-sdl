@@ -9,8 +9,10 @@ set(SDL3_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
 set(SDL3_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL3_STATIC ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif()
 
 fetch_package("github:holepunchto/libjstl#d92f140c")
 fetch_package("github:libsdl-org/SDL#main")
