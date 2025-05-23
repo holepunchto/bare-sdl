@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 find_package(cmake-bare REQUIRED PATHS node_modules/cmake-bare)
-
-include(FetchContent)
+find_package(cmake-fetch REQUIRED PATHS node_modules/cmake-fetch)
 
 project(bare_sdl C)
 
@@ -11,13 +10,8 @@ set(SDL3_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL3_STATIC ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
 
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git"
-    GIT_TAG "main"
-    EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(SDL3)
+fetch_package("github:holepunchto/libjstl#d92f140c")
+fetch_package("github:libsdl-org/SDL#main")
 
 add_bare_module(bare_sdl)
 
@@ -31,4 +25,5 @@ target_link_libraries(
   ${bare_sdl}
   PRIVATE
     SDL3::SDL3
+    jstl
 )
