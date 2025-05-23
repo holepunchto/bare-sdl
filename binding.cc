@@ -48,7 +48,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   assert(err == 0);
 
 #define V_FUNCTION(name, function) \
-  err = js_set_property<function>(env, _exports, name);
+  err = js_set_property<function>(env, _exports, name); \
   assert(err == 0);
 
   V_UINT32("SDL_WINDOWPOS_CENTERED", SDL_WINDOWPOS_CENTERED)
