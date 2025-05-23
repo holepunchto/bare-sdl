@@ -8,6 +8,13 @@ typedef struct {
   SDL_Window *handle;
 } bare_sdl_window_t;
 
+static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
+
+static void
+bare_sdl__on_init(void) {
+  SDL_Init(SDL_INIT_VIDEO);
+}
+
 static js_arraybuffer_t
 bare_sdl_create_window(
   js_env_t *env,
@@ -50,11 +57,10 @@ bare_sdl_destroy_window(
 
 static js_value_t *
 bare_sdl_exports(js_env_t *env, js_value_t *exports) {
+  uv_once(&bare_sdl__init_guard, bare_sdl__on_init);
+
   int err;
   js_object_t _exports = static_cast<js_object_t>(exports);
-
-  // TODO: move that away
-  SDL_Init(SDL_INIT_VIDEO);
 
 #define V_UINT32(name, constant) \
   err = js_set_property(env, _exports, name, static_cast<uint32_t>(constant)); \
