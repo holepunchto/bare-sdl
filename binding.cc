@@ -19,22 +19,18 @@ static js_arraybuffer_t
 bare_sdl_create_window(
   js_env_t *env,
   js_receiver_t,
-  js_string_t title,
+  std::string title,
   uint32_t width,
   uint32_t height
 ) {
   int err;
   js_arraybuffer_t handle;
 
-  std::string value;
-  err = js_get_value_string(env, title, value);
-  assert(err == 0);
-
   bare_sdl_window_t *win;
   err = js_create_arraybuffer(env, win, handle);
   assert(err == 0);
 
-  win->handle = SDL_CreateWindow(value.c_str(), width, height, 0);
+  win->handle = SDL_CreateWindow(title.c_str(), width, height, 0);
   assert(win->handle != nullptr);
 
   return handle;
