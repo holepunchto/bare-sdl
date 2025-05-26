@@ -1,3 +1,4 @@
+#include "SDL3/SDL_error.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
@@ -32,7 +33,7 @@ bare_sdl_create_window(
 
   win->handle = SDL_CreateWindow(title.c_str(), width, height, 0);
   if (win->handle == nullptr) {
-    err = js_throw_error(env, NULL, "Window creation failed");
+    err = js_throw_error(env, NULL, SDL_GetError());
     assert(err == 0);
   }
 
