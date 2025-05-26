@@ -31,7 +31,10 @@ bare_sdl_create_window(
   assert(err == 0);
 
   win->handle = SDL_CreateWindow(title.c_str(), width, height, 0);
-  assert(win->handle != nullptr);
+  if (win->handle == nullptr) {
+    err = js_throw_error(env, NULL, "Window creation failed");
+    assert(err == 0);
+  }
 
   return handle;
 }
