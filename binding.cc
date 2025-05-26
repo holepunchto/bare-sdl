@@ -52,21 +52,20 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   int err;
   js_object_t _exports = static_cast<js_object_t>(exports);
 
-#define V_UINT32(name, constant) \
+#define V(name, constant) \
   err = js_set_property(env, _exports, name, static_cast<uint32_t>(constant)); \
   assert(err == 0);
 
-#define V_FUNCTION(name, function) \
+  V("SDL_WINDOWPOS_CENTERED", SDL_WINDOWPOS_CENTERED)
+#undef V
+
+#define V(name, function) \
   err = js_set_property<function>(env, _exports, name); \
   assert(err == 0);
 
-  V_UINT32("SDL_WINDOWPOS_CENTERED", SDL_WINDOWPOS_CENTERED)
-
-  V_FUNCTION("createWindow", bare_sdl_create_window)
-  V_FUNCTION("destroyWindow", bare_sdl_destroy_window)
-
-#undef V_UINT32
-#undef V_FUNCTION
+  V("createWindow", bare_sdl_create_window)
+  V("destroyWindow", bare_sdl_destroy_window)
+#undef V
 
   return exports;
 }
