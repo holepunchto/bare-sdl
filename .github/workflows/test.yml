@@ -39,11 +39,16 @@ jobs:
             libxi-dev \
             libxfixes-dev \
             libwayland-dev \
+            xvfb
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'android' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}
       - run: bare-make build
       - run: bare-make install
-      - run: npm test
-        if: ${{ matrix.platform == 'linux' || (matrix.platform == 'darwin' && matrix.arch == 'arm64') || (matrix.platform == 'win32' && matrix.arch == 'x64') }}
+      - name: Run tests (Linux with Xvfb)
+        if: ${{ matrix.platform == 'linux' }}
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" npm test
+      - name: Run tests
+        if: ${{ matrix.platform != 'linux' && (matrix.platform == 'darwin' && matrix.arch == 'arm64') || (matrix.platform == 'win32' && matrix.arch == 'x64') }}
+        run: npm test
