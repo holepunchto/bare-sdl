@@ -38,16 +38,10 @@ bare_sdl_create_window(
 
 static void
 bare_sdl_destroy_window(
-  js_env_t *env,
+  js_env_t *,
   js_receiver_t,
-  js_arraybuffer_t handle
+  js_arraybuffer_span_of_t<bare_sdl_window_t, 1> win
 ) {
-  int err;
-
-  bare_sdl_window_t *win;
-  err = js_get_arraybuffer_info(env, handle, win);
-  assert(err == 0);
-
   SDL_DestroyWindow(win->handle);
 }
 
