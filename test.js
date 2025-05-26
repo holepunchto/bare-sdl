@@ -14,6 +14,24 @@ test('window class should be destroyed', (t) => {
 })
 
 test('it should be possible to pass a flag', (t) => {
-  const win = new sdl.Window('Bare-ly a Window', 100, 100, sdl.constants.windowFlags.SDL_WINDOW_FULLSCREEN)
+  const win = new sdl.Window(
+    'Bare-ly a Window',
+    100,
+    100,
+    sdl.constants.windowFlags.SDL_WINDOW_FULLSCREEN
+  )
   t.ok(win)
+})
+
+test('it should throw an error when window creation fails', (t) => {
+  t.exception(() => {
+    let win = new sdl.Window(
+      'Invalid Window',
+      100,
+      100,
+      sdl.constants.windowFlags.SDL_WINDOW_VULKAN |
+        sdl.constants.windowFlags.SDL_WINDOW_METAL
+    )
+    console.log(win)
+  }, /SDL Error/)
 })
