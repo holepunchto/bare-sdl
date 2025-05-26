@@ -10,11 +10,6 @@ test('it should expose a window class', (t) => {
   t.ok(win)
 })
 
-test('it should expose a window class', (t) => {
-  const win = new sdl.Window('Bare-ly a Window', 100, 100)
-  t.ok(win)
-})
-
 test('window class should be destroyed', (t) => {
   const win = new sdl.Window('Bare-ly a Window', 100, 100)
   t.execution(() => {
