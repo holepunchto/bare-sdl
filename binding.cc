@@ -1,9 +1,9 @@
-#include "SDL3/SDL_error.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>
 
 typedef struct {
   SDL_Window *handle;
