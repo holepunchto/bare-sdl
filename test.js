@@ -18,7 +18,7 @@ test('it should be possible to pass a flag', (t) => {
     'Bare-ly a Window',
     100,
     100,
-    sdl.constants.windowFlags.SDL_WINDOW_FULLSCREEN
+    sdl.constants.SDL_WINDOW_FULLSCREEN
   )
   t.ok(win)
 })
@@ -29,8 +29,7 @@ test('it should throw an error when window creation fails', (t) => {
       'Invalid Window',
       100,
       100,
-      sdl.constants.windowFlags.SDL_WINDOW_VULKAN |
-        sdl.constants.windowFlags.SDL_WINDOW_METAL
+      sdl.constants.SDL_WINDOW_VULKAN | sdl.constants.SDL_WINDOW_METAL
     )
   })
 })
