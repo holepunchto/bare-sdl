@@ -32,6 +32,5 @@ test('it should throw an error when window creation fails', (t) => {
       sdl.constants.windowFlags.SDL_WINDOW_VULKAN |
         sdl.constants.windowFlags.SDL_WINDOW_METAL
     )
-    console.log(win)
-  }, /SDL Error/)
+  })
 })

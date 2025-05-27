@@ -36,6 +36,8 @@ bare_sdl_create_window(
   if (win->handle == nullptr) {
     err = js_throw_error(env, NULL, SDL_GetError());
     assert(err == 0);
+
+    throw js_pending_exception;
   }
 
   return handle;
