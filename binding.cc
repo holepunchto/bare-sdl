@@ -100,15 +100,7 @@ bare_sdl_clear_render(
   js_receiver_t,
   js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren
 ) {
-  bool res = SDL_RenderClear(ren->handle);
-  if (!res) {
-    int err = js_throw_error(env, NULL, SDL_GetError());
-    assert(err == 0);
-
-    throw js_pending_exception;
-  }
-
-  return res;
+  return SDL_RenderClear(ren->handle);
 }
 
 static bool
