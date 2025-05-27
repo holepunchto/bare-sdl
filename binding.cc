@@ -1,3 +1,4 @@
+#include "SDL3/SDL_render.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
@@ -9,12 +10,18 @@ typedef struct {
   SDL_Window *handle;
 } bare_sdl_window_t;
 
+typedef struct {
+  SDL_Renderer *handle;
+} bare_sdl_renderer_t;
+
 static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
 bare_sdl__on_init(void) {
   SDL_Init(SDL_INIT_VIDEO);
 }
+
+// Window
 
 static js_arraybuffer_t
 bare_sdl_create_window(
@@ -50,6 +57,32 @@ bare_sdl_destroy_window(
   js_arraybuffer_span_of_t<bare_sdl_window_t, 1> win
 ) {
   SDL_DestroyWindow(win->handle);
+}
+
+// Renderer
+//
+static js_arraybuffer_t
+bare_sdl_create_renderer(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_window_t, 1> win
+) {
+  int err;
+  js_arraybuffer_t handle;
+
+  bare_sdl_renderer_t *ren;
+  err = js_create_arraybuffer(env, ren, handle);
+  assert(err == 0);
+
+  ren->handle = SDL_CreateRenderer(win->handle, nullptr);
+  if (win->handle == nullptr) {
+    err = js_throw_error(env, NULL, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  return handle;
 }
 
 static js_value_t *
@@ -95,6 +128,8 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
 
   V("createWindow", bare_sdl_create_window)
   V("destroyWindow", bare_sdl_destroy_window)
+
+  V("createRenderer", bare_sdl_create_renderer)
 #undef V
 
   return exports;
