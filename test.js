@@ -12,6 +12,18 @@ test('window class should throw if title is not a string', (t) => {
   })
 })
 
+test('window class should throw if width is not a string', (t) => {
+  t.exception.all(() => {
+    const win = new sdl.Window('lol', '100', 100)
+  })
+})
+
+test('window class should throw if height is not a string', (t) => {
+  t.exception.all(() => {
+    const win = new sdl.Window('lol', 100, '100')
+  })
+})
+
 test('window class should be destroyed', (t) => {
   const win = new sdl.Window('Bare-ly a Window', 100, 100)
   t.execution(() => {
