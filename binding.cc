@@ -111,6 +111,15 @@ bare_sdl_clear_render(
   return res;
 }
 
+static bool
+bare_sdl_present_render(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren
+) {
+  return SDL_RenderPresent(ren->handle);
+}
+
 // Exports
 
 static js_value_t *
@@ -160,6 +169,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("createRenderer", bare_sdl_create_renderer)
   V("destroyRenderer", bare_sdl_destroy_renderer)
   V("clearRender", bare_sdl_clear_render)
+  V("presentRender", bare_sdl_present_render)
 #undef V
 
   return exports;
