@@ -60,7 +60,7 @@ bare_sdl_destroy_window(
 }
 
 // Renderer
-//
+
 static js_arraybuffer_t
 bare_sdl_create_renderer(
   js_env_t *env,
@@ -84,6 +84,17 @@ bare_sdl_create_renderer(
 
   return handle;
 }
+
+static void
+bare_sdl_destroy_renderer(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren
+) {
+  SDL_DestroyRenderer(ren->handle);
+}
+
+// Exports
 
 static js_value_t *
 bare_sdl_exports(js_env_t *env, js_value_t *exports) {
@@ -130,6 +141,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("destroyWindow", bare_sdl_destroy_window)
 
   V("createRenderer", bare_sdl_create_renderer)
+  V("destroyRenderer", bare_sdl_destroy_renderer)
 #undef V
 
   return exports;

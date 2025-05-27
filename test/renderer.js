@@ -12,3 +12,13 @@ test('Renderer class should throw if window is not a intance of Window', (t) => 
     new sdl.Renderer({})
   })
 })
+
+test('Renderer class could be destroyed', (t) => {
+  const win = new sdl.Window('test', 100, 100)
+  const ren = new sdl.Renderer(win)
+
+  t.execution(() => {
+    // TODO: the destroy method is not called
+    ren._destroy()
+  })
+})
