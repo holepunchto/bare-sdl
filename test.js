@@ -6,6 +6,12 @@ test('it should expose a window class', (t) => {
   t.ok(win)
 })
 
+test('window class should throw if title is not a string', (t) => {
+  t.exception.all(() => {
+    const win = new sdl.Window(2832, 100, 100)
+  })
+})
+
 test('window class should be destroyed', (t) => {
   const win = new sdl.Window('Bare-ly a Window', 100, 100)
   t.execution(() => {
