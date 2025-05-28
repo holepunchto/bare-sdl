@@ -167,6 +167,19 @@ bare_sdl_destroy_texture(
   SDL_DestroyTexture(tex->handle);
 }
 
+static bool
+bare_sdl_update_texture(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex,
+  js_arraybuffer_span_t buf,
+  uint32_t buf_offset,
+  uint32_t buf_len
+) {
+  // TODO: add SDL_Rect
+  return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], buf_len);
+}
+
 // Exports
 
 static js_value_t *
@@ -304,6 +317,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
 
   V("createTexture", bare_sdl_create_texture)
   V("destroyTexture", bare_sdl_destroy_texture)
+  V("updateTexture", bare_sdl_update_texture)
 #undef V
 
   return exports;

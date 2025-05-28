@@ -45,3 +45,12 @@ test('Texture class could be destroyed', (t) => {
     tex._destroy()
   })
 })
+
+test('Texture class should expose an update method', (t) => {
+  const win = new sdl.Window('test', 100, 100)
+  const ren = new sdl.Renderer(win)
+  const tex = new sdl.Texture(ren, 100, 100)
+  const buf = Buffer.alloc(8)
+
+  t.ok(typeof tex.update(buf) == 'boolean')
+})
