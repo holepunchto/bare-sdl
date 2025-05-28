@@ -170,10 +170,10 @@ bare_sdl_update_texture(
   js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex,
   js_arraybuffer_span_t buf,
   uint32_t buf_offset,
-  uint32_t buf_len
+  int pitch
 ) {
   // TODO: add SDL_Rect
-  return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], buf_len);
+  return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], pitch);
 }
 
 static bool
