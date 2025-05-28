@@ -176,6 +176,16 @@ bare_sdl_update_texture(
   return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], buf_len);
 }
 
+static bool
+bare_sdl_poll(
+  js_env_t *,
+  js_receiver_t
+) {
+  // TODO: pass it as an arg
+  SDL_Event e;
+  return SDL_PollEvent(&e);
+}
+
 // Exports
 
 static js_value_t *
@@ -314,6 +324,8 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("createTexture", bare_sdl_create_texture)
   V("destroyTexture", bare_sdl_destroy_texture)
   V("updateTexture", bare_sdl_update_texture)
+
+  V("poll", bare_sdl_poll)
 #undef V
 
   return exports;
