@@ -158,6 +158,15 @@ bare_sdl_create_texture(
   return handle;
 }
 
+static void
+bare_sdl_destroy_texture(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex
+) {
+  SDL_DestroyTexture(tex->handle);
+}
+
 // Exports
 
 static js_value_t *
@@ -294,6 +303,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("textureRender", bare_sdl_texture_render)
 
   V("createTexture", bare_sdl_create_texture)
+  V("destroyTexture", bare_sdl_destroy_texture)
 #undef V
 
   return exports;

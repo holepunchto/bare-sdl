@@ -34,3 +34,14 @@ test('Texture class should throw an error if pixel format is wrong', (t) => {
     new sdl.Texture(ren, 100, 100, 1)
   })
 })
+
+test('Texture class could be destroyed', (t) => {
+  const win = new sdl.Window('test', 100, 100)
+  const ren = new sdl.Renderer(win)
+  const tex = new sdl.Texture(ren, 100, 100)
+
+  t.execution(() => {
+    // TODO: the destroy method is not called
+    tex._destroy()
+  })
+})
