@@ -1,12 +1,8 @@
-#include "SDL3/SDL_pixels.h"
-#include "SDL3/SDL_render.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_error.h>
-#include <sys/_types/_u_int64_t.h>
 
 typedef struct {
   SDL_Window *handle;
