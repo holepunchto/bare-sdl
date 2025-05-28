@@ -38,7 +38,7 @@ jobs:
             libxfixes-dev \
             libwayland-dev \
             xvfb
-        if: ${{ matrix.platform == 'linux' || matrix.platform == 'android' }}
+        if: ${{ matrix.platform == 'linux' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}
