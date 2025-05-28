@@ -26,7 +26,7 @@ test('Renderer class could be destroyed', (t) => {
 test('Renderer class should expose a clear method', (t) => {
   const win = new sdl.Window('test', 100, 100)
   const ren = new sdl.Renderer(win)
-  t.ok(ren.clear())
+  t.ok(typeof ren.clear() == 'boolean')
 })
 
 test('Renderer class should expose a present method', (t) => {
@@ -34,4 +34,12 @@ test('Renderer class should expose a present method', (t) => {
   const ren = new sdl.Renderer(win)
 
   t.ok(ren.clear())
+})
+
+test('Renderer class should expose a texture method', (t) => {
+  const win = new sdl.Window('test', 100, 100)
+  const ren = new sdl.Renderer(win)
+  const tex = new sdl.Texture(ren, 100, 100)
+
+  t.ok(typeof ren.texture(tex) == 'boolean')
 })

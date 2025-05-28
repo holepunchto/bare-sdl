@@ -117,6 +117,16 @@ bare_sdl_present_render(
 ) {
   return SDL_RenderPresent(ren->handle);
 }
+static bool
+bare_sdl_texture_render(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren,
+  js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex
+) {
+  // TODO: add source and destination SDL_Rect
+  return SDL_RenderTexture(ren->handle, tex->handle, nullptr, nullptr);
+}
 
 // Texture
 
@@ -281,6 +291,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("destroyRenderer", bare_sdl_destroy_renderer)
   V("clearRender", bare_sdl_clear_render)
   V("presentRender", bare_sdl_present_render)
+  V("textureRender", bare_sdl_texture_render)
 
   V("createTexture", bare_sdl_create_texture)
 #undef V
