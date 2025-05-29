@@ -44,14 +44,21 @@ class Playback {
 }
 
 // Set up device
+let url = undefined
+if (Bare.platform == 'win32') url = 'video=FaceTime HD Camera'
+
 const options = new ffmpeg.Dictionary()
 options.set('framerate', '30')
 options.set('video_size', '1280x720')
-options.set('pixel_format', 'uyvy422')
+if (Bare.platform == 'darwin') options.set('pixel_format', 'uyvy422')
+
 const inputFormatContext = new ffmpeg.InputFormatContext(
   new ffmpeg.InputFormat(),
-  options
+  options,
+  url
 )
+
+// Find video stream
 const bestStream = inputFormatContext.getBestStream(
   ffmpeg.constants.mediaType.VIDEO
 )
