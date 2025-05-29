@@ -51,6 +51,8 @@ const options = new ffmpeg.Dictionary()
 options.set('framerate', '30')
 options.set('video_size', '1280x720')
 if (Bare.platform == 'darwin') options.set('pixel_format', 'uyvy422')
+if (Bare.platform == 'win32') options.set('pixel_format', 'yuyv422')
+if (Bare.platform == 'win32') options.set('rtbufsize', '100M')
 
 const inputFormatContext = new ffmpeg.InputFormatContext(
   new ffmpeg.InputFormat(),
