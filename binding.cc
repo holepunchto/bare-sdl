@@ -183,7 +183,14 @@ bare_sdl_poll(
 ) {
   // TODO: pass it as an arg
   SDL_Event e;
-  return SDL_PollEvent(&e);
+  if (SDL_PollEvent(&e)) {
+    // Return false only for quit event
+    if (e.type == SDL_EVENT_QUIT) {
+      return false;
+    }
+    return true;
+  }
+  return true; // Return true even when no events
 }
 
 // Exports
