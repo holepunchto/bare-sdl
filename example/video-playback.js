@@ -1,6 +1,14 @@
 const ffmpeg = require('bare-ffmpeg')
 const sdl = require('..')
 
+// Log
+
+function log(message) {
+  if (Bare.argv.includes('--debug')) {
+    console.log(message)
+  }
+}
+
 // Playback class
 
 class Playback {
@@ -123,19 +131,19 @@ function encode(packet) {
   packet.unref()
 
   while (rawDecoder.receiveFrame(rawFrame)) {
-    console.log('1 - decoded frame')
+    log('1 - decoded frame')
     // NOTE: for Mafintosh
     // This were you can playback for the sender
     // playback.render(rawFrame)
 
     toYUV.scale(rawFrame, yuvFrame)
-    console.log('2 - scale frame to yuv')
+    log('2 - scale frame to yuv')
 
     encoderContext.sendFrame(yuvFrame)
-    console.log('3 - send frame')
+    log('3 - send frame')
 
     while (encoderContext.receivePacket(packet)) {
-      console.log('4 - encoded packet')
+      log('4 - encoded packet')
       // NOTE: for Mafintosh
       // This where you push to the swarm!
       decode(packet.data)
@@ -153,9 +161,9 @@ function decode(buffer) {
 
   const decodedFrame = new ffmpeg.Frame()
   while (decoderContext.receiveFrame(decodedFrame)) {
-    console.log('5 - decoded frame')
+    log('5 - decoded frame')
     toRGB.scale(decodedFrame, rgbaFrame)
-    console.log('6 - scale frame to rgba')
+    log('6 - scale frame to rgba')
     playback.render(rgbaFrame.data, rgbaFrame.lineSize(0))
   }
 }
