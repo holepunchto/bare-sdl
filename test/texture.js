@@ -50,7 +50,7 @@ test('Texture class should expose an update method', (t) => {
   const win = new sdl.Window('test', 100, 100)
   const ren = new sdl.Renderer(win)
   const tex = new sdl.Texture(ren, 100, 100)
-  const buf = Buffer.alloc(8)
+  const buf = Buffer.alloc(400 * 4)
 
-  t.ok(typeof tex.update(buf) == 'boolean')
+  t.ok(typeof tex.update(buf, 400) == 'boolean')
 })

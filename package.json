@@ -1,6 +1,6 @@
 {
   "name": "bare-sdl",
-  "version": "0.0.0",
+  "version": "1.0.0-1",
   "description": "Bare binding for SDL",
   "exports": {
     "./package": "./package.json",
@@ -8,7 +8,7 @@
   },
   "files": [
     "index.js",
-    "binding.c",
+    "binding.cc",
     "binding.js",
     "CMakeLists.txt",
     "lib",
