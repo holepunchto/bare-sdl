@@ -172,12 +172,6 @@ bare_sdl_update_texture(
   uint32_t buf_offset,
   int pitch
 ) {
-  printf("[bare_sdl_update_texture] pitch=%d, buf_offset=%u, buf_length=%zu\n", pitch, buf_offset, buf.size());
-  printf("[bare_sdl_update_texture] tex=%p, tex->handle=%p\n", (void *) tex, (void *) tex->handle);
-  fflush(stdout);
-
-  fflush(stdout);
-
   // TODO: add SDL_Rect
   return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], pitch);
 }
