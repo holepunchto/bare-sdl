@@ -12,7 +12,7 @@ function log(message) {
 // Playback class
 
 class Playback {
-  constructor(height, width) {
+  constructor(width, height) {
     this.win = new sdl.Window('Window', width, height)
     this.ren = new sdl.Renderer(this.win)
     this.tex = new sdl.Texture(
@@ -90,7 +90,7 @@ encoderContext.timeBase = new ffmpeg.Rational(1, 30)
 encoderContext.open(encoderOptions)
 
 // Set up playback
-const playback = new Playback(rawDecoder.height, rawDecoder.width)
+const playback = new Playback(rawDecoder.width, rawDecoder.height)
 
 // Allocate frames
 const rawFrame = new ffmpeg.Frame()
