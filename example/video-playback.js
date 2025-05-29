@@ -2,20 +2,15 @@ const ffmpeg = require('bare-ffmpeg')
 const sdl = require('..')
 
 // Playback class
-//
-const binding = require('../binding')
-const ReferenceCounted = require('./reference-counted')
 
 class Playback {
   constructor(height, width) {
-    super()
-
-    this.win = new sdl.Window('Window', height, width)
-    this.ren = new sdl.Renderer(win)
+    this.win = new sdl.Window('Window', width, height)
+    this.ren = new sdl.Renderer(this.win)
     this.tex = new sdl.Texture(
-      ren,
-      100,
-      100,
+      this.ren,
+      width,
+      height,
       sdl.constants.SDL_PIXELFORMAT_RGB24,
       sdl.constants.SDL_TEXTUREACCESS_STREAMING
     )
@@ -28,8 +23,8 @@ class Playback {
     this.tex._destroy()
   }
 
-  render(buffer) {
-    this.tex.update(buffer)
+  render(buffer, lineSize) {
+    this.tex.update(buffer, lineSize)
     this.ren.clear()
     this.ren.texture(this.tex)
     this.ren.present()
@@ -161,7 +156,7 @@ function decode(buffer) {
     console.log('5 - decoded frame')
     toRGB.scale(decodedFrame, rgbaFrame)
     console.log('6 - scale frame to rgba')
-    playback.render(rgbaFrame.buffer)
+    playback.render(rgbaFrame.data, rgbaFrame.lineSize(0))
   }
 }
 
