@@ -6,7 +6,7 @@ test('it should expose an Event class', (t) => {
   t.ok(event)
 })
 
-test('Event class shouls expose a type getter', (t) => {
+test('Event class shouls expose a type getter initialize at zero', (t) => {
   const event = new sdl.Event()
-  t.ok(typeof event.type == 'number')
+  t.ok(event.type == 0)
 })
