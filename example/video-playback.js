@@ -39,7 +39,14 @@ class Playback {
   }
 
   poll() {
-    return this.poller.poll()
+    const event = new sdl.Event()
+    if (this.poller.poll(event)) {
+      if (event.type == sdl.constants.SDL_EVENT_QUIT) {
+        return false
+      }
+      return true
+    }
+    return true
   }
 }
 
