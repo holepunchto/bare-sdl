@@ -203,8 +203,6 @@ bare_sdl_create_event(
   err = js_create_arraybuffer(env, event, handle);
   assert(err == 0);
 
-  memset(&event->handle, 0, sizeof(SDL_Event));
-
   return handle;
 }
 
