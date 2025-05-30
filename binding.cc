@@ -16,6 +16,10 @@ typedef struct {
   SDL_Texture *handle;
 } bare_sdl_texture_t;
 
+typedef struct {
+  SDL_Event handle;
+} bare_sdl_event_t;
+
 static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
@@ -176,14 +180,42 @@ bare_sdl_update_texture(
   return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], pitch);
 }
 
+// Poll Event
+
 static bool
 bare_sdl_poll(
   js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_event_t, 1> e
+) {
+  return SDL_PollEvent(&e->handle);
+}
+
+static js_arraybuffer_t
+bare_sdl_create_event(
+  js_env_t *env,
   js_receiver_t
 ) {
-  // TODO: pass it as an arg
+  int err;
+  js_arraybuffer_t handle;
+
+  bare_sdl_event_t *event;
+  err = js_create_arraybuffer(env, event, handle);
+  assert(err == 0);
+
   SDL_Event e;
-  return SDL_PollEvent(&e);
+  event->handle = e;
+
+  return handle;
+}
+
+static uint32_t
+bare_sdl_get_event_type(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_event_t, 1> e
+) {
+  return e->handle.type;
 }
 
 // Exports
@@ -306,6 +338,10 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("SDL_TEXTUREACCESS_STATIC", SDL_TEXTUREACCESS_STATIC)
   V("SDL_TEXTUREACCESS_STREAMING", SDL_TEXTUREACCESS_STREAMING)
   V("SDL_TEXTUREACCESS_TARGET", SDL_TEXTUREACCESS_TARGET)
+
+  // Event type
+
+  V("SDL_EVENT_QUIT", SDL_EVENT_QUIT)
 #undef V
 
 #define V(name, function) \
@@ -326,6 +362,8 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("updateTexture", bare_sdl_update_texture)
 
   V("poll", bare_sdl_poll)
+  V("createEvent", bare_sdl_create_event)
+  V("getEventType", bare_sdl_get_event_type)
 #undef V
 
   return exports;

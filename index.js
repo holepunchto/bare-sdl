@@ -1,4 +1,5 @@
 exports.constants = require('./lib/constants')
+exports.Event = require('./lib/event')
 exports.Poller = require('./lib/poller')
 exports.Renderer = require('./lib/renderer')
 exports.Texture = require('./lib/texture')
