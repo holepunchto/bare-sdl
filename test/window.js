@@ -3,6 +3,9 @@ const sdl = require('..')
 
 test('it should expose a window class', (t) => {
   const win = new sdl.Window('Window', 100, 100)
+  t.teardown(() => {
+    win._destroy()
+  })
   t.ok(win)
 })
 
@@ -24,14 +27,6 @@ test('window class should throw if height is not a string', (t) => {
   })
 })
 
-test('window class should be destroyed', (t) => {
-  const win = new sdl.Window('Window', 100, 100)
-  t.execution(() => {
-    // TODO: we should be able to use .destroy
-    win._destroy()
-  })
-})
-
 test('it should be possible to pass a flag', (t) => {
   const win = new sdl.Window(
     'Window',
@@ -39,6 +34,10 @@ test('it should be possible to pass a flag', (t) => {
     100,
     sdl.constants.SDL_WINDOW_FULLSCREEN
   )
+  t.teardown(() => {
+    win._destroy()
+  })
+
   t.ok(win)
 })
 
