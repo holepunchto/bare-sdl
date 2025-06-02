@@ -69,7 +69,7 @@ const inputFormatContext = new ffmpeg.InputFormatContext(
 
 // Find video stream
 const bestStream = inputFormatContext.getBestStream(
-  ffmpeg.constants.mediaType.VIDEO
+  ffmpeg.constants.mediaTypes.VIDEO
 )
 if (!bestStream) {
   process.exit(1)
@@ -186,10 +186,7 @@ function decode(buffer) {
     log('5 - decoded frame')
     log('6 - scale frame to rgba')
     toRGB.scale(decodedFrame, rgbFrame)
-    playback.render(
-      rgbaImage.data,
-      rgbaImage.width * 4 // TODO: Use image.lineSize()
-    )
+    playback.render(rgbaImage.data, rgbaImage.lineSize())
   }
 }
 
