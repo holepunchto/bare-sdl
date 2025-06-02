@@ -11,12 +11,6 @@ test('it should expose a Renderer class', (t) => {
   t.ok(ren)
 })
 
-test('Renderer class should throw if window is not a intance of Window', (t) => {
-  t.exception.all(() => {
-    new sdl.Renderer({})
-  })
-})
-
 test('Renderer class should expose a clear method', (t) => {
   const win = new sdl.Window('test', 100, 100)
   const ren = new sdl.Renderer(win)

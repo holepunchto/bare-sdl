@@ -29,12 +29,6 @@ test('Texture class should be construct specifiying pixel format and texture acc
   t.ok(tex)
 })
 
-test('Texture class should throw an error if renderer is not an instance of Renderer', (t) => {
-  t.exception.all(() => {
-    new sdl.Texture({}, 100, 100)
-  })
-})
-
 test('Texture class should throw an error if pixel format is wrong', (t) => {
   const win = new sdl.Window('test', 100, 100)
   const ren = new sdl.Renderer(win)

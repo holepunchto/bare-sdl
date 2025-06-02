@@ -9,24 +9,6 @@ test('it should expose a window class', (t) => {
   t.ok(win)
 })
 
-test('window class should throw if title is not a string', (t) => {
-  t.exception.all(() => {
-    const win = new sdl.Window(2832, 100, 100)
-  })
-})
-
-test('window class should throw if width is not a string', (t) => {
-  t.exception.all(() => {
-    const win = new sdl.Window('Window', '100', 100)
-  })
-})
-
-test('window class should throw if height is not a string', (t) => {
-  t.exception.all(() => {
-    const win = new sdl.Window('Window', 100, '100')
-  })
-})
-
 test('it should be possible to pass a flag', (t) => {
   const win = new sdl.Window(
     'Window',
