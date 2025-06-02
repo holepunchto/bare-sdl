@@ -40,13 +40,12 @@ class Playback {
 
   poll() {
     const event = new sdl.Event()
+
     if (this.poller.poll(event)) {
-      if (event.type == sdl.constants.SDL_EVENT_QUIT) {
-        return false
-      }
-      return true
+      return event
     }
-    return true
+
+    return null
   }
 }
 
@@ -138,13 +137,6 @@ const toRGB = new ffmpeg.Scaler(
   rawDecoder.height
 )
 
-function capture() {
-  const packet = new ffmpeg.Packet()
-  while (playback.poll()) {
-    encode(packet)
-  }
-}
-
 function encode(packet) {
   const ret = inputFormatContext.readFrame(packet)
   if (!ret) return
@@ -190,4 +182,16 @@ function decode(buffer) {
   }
 }
 
-capture()
+const loop = setInterval(() => {
+  let event
+
+  while ((event = playback.poll())) {
+    if (event.type === sdl.constants.SDL_EVENT_QUIT) {
+      clearInterval(loop)
+    }
+  }
+
+  const packet = new ffmpeg.Packet()
+  encode(packet)
+  packet.destroy()
+}, 1000 / 24 /* 24 FPS */)
