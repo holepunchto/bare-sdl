@@ -49,7 +49,7 @@ bare_sdl_create_window(
   win->handle = SDL_CreateWindow(title.c_str(), width, height, flags);
 
   if (win->handle == nullptr) {
-    err = js_throw_error(env, NULL, SDL_GetError());
+    err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
@@ -86,7 +86,7 @@ bare_sdl_create_renderer(
   ren->handle = SDL_CreateRenderer(win->handle, nullptr);
 
   if (win->handle == nullptr) {
-    err = js_throw_error(env, NULL, SDL_GetError());
+    err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
@@ -156,7 +156,7 @@ bare_sdl_create_texture(
   tex->handle = SDL_CreateTexture(ren->handle, (SDL_PixelFormat) pixel_format, (SDL_TextureAccess) texture_access, width, height);
 
   if (tex->handle == nullptr) {
-    err = js_throw_error(env, NULL, SDL_GetError());
+    err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
@@ -184,7 +184,7 @@ bare_sdl_update_texture(
   int pitch
 ) {
   // TODO: add SDL_Rect
-  return SDL_UpdateTexture(tex->handle, NULL, &buf[buf_offset], pitch);
+  return SDL_UpdateTexture(tex->handle, nullptr, &buf[buf_offset], pitch);
 }
 
 // Events
