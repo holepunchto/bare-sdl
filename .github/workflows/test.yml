@@ -47,4 +47,4 @@ jobs:
       - run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" npm test
         if: ${{ matrix.platform == 'linux' }}
       - run: npm test
-        if: ${{ (matrix.platform == 'darwin' && matrix.arch == 'arm64') || (matrix.platform == 'win32' && matrix.arch == 'x64') }}
+        if: ${{ (matrix.platform != 'linux' }}
