@@ -106,11 +106,17 @@ yuvFrame.width = rawDecoder.width
 yuvFrame.height = rawDecoder.height
 yuvFrame.pixelFormat = ffmpeg.constants.pixelFormats.YUV420P
 yuvFrame.alloc()
-const rgbaFrame = new ffmpeg.Frame()
-rgbaFrame.width = rawDecoder.width
-rgbaFrame.height = rawDecoder.height
-rgbaFrame.pixelFormat = ffmpeg.constants.pixelFormats.RGB24
-rgbaFrame.alloc()
+const rgbFrame = new ffmpeg.Frame()
+rgbFrame.width = rawDecoder.width
+rgbFrame.height = rawDecoder.height
+rgbFrame.pixelFormat = ffmpeg.constants.pixelFormats.RGB24
+rgbFrame.alloc()
+const rgbaImage = new ffmpeg.Image(
+  ffmpeg.constants.pixelFormats.RGBA,
+  rgbFrame.width,
+  rgbFrame.height
+)
+rgbaImage.fill(rgbFrame)
 
 // Set up toYUV  scaler
 const toYUV = new ffmpeg.Scaler(
@@ -178,9 +184,12 @@ function decode(buffer) {
   const decodedFrame = new ffmpeg.Frame()
   while (decoderContext.receiveFrame(decodedFrame)) {
     log('5 - decoded frame')
-    toRGB.scale(decodedFrame, rgbaFrame)
     log('6 - scale frame to rgba')
-    playback.render(rgbaFrame.data, rgbaFrame.lineSize(0))
+    toRGB.scale(decodedFrame, rgbFrame)
+    playback.render(
+      rgbaImage.data,
+      rgbaImage.width * 4 // TODO: Use image.lineSize()
+    )
   }
 }
 
