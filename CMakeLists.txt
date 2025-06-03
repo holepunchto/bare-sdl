@@ -15,6 +15,12 @@ fetch_package("github:libsdl-org/SDL#release-3.2.14")
 
 add_bare_module(bare_sdl)
 
+set_target_properties(
+  ${bare_sdl}
+  PROPERTIES
+  CXX_SCAN_FOR_MODULES OFF
+)
+
 target_sources(
   ${bare_sdl}
   PRIVATE
