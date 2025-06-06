@@ -1,6 +1,6 @@
 {
   "name": "bare-sdl",
-  "version": "1.0.0-2",
+  "version": "1.0.0-3",
   "description": "Bare binding for SDL",
   "exports": {
     "./package": "./package.json",
