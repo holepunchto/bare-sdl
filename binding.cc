@@ -20,6 +20,10 @@ typedef struct {
   SDL_Event handle;
 } bare_sdl_event_t;
 
+typedef struct {
+  SDL_KeyboardEvent handle;
+} bare_sdl_keyboard_event_t;
+
 static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
@@ -233,11 +237,11 @@ bare_sdl_get_event_key(
 
   js_arraybuffer_t handle;
 
-  SDL_KeyboardEvent *key;
+  bare_sdl_keyboard_event_t *key;
   err = js_create_arraybuffer(env, key, handle);
   assert(err == 0);
 
-  *key = e->handle.key;
+  key->handle = e->handle.key;
 
   return handle;
 }
@@ -246,9 +250,9 @@ static uint32_t
 bare_sdl_get_event_key_scancode(
   js_env_t *env,
   js_receiver_t,
-  js_arraybuffer_span_of_t<SDL_KeyboardEvent, 1> key
+  js_arraybuffer_span_of_t<bare_sdl_keyboard_event_t, 1> key
 ) {
-  return key->scancode;
+  return key->handle.scancode;
 }
 
 // Exports
