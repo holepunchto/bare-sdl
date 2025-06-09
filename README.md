@@ -13,7 +13,7 @@ npm i bare-sdl
 The Window API provides functionality to create SDL windows.
 
 ```javascript
-const window = new SDLWindow(title, width, height, [flags])
+const window = new SDLWindow(title, width, height[, flags])
 ```
 
 Parameters:
