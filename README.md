@@ -37,13 +37,53 @@ Available flags are exposed through the `constants` object. Common flags include
 
 Example:
 
-```javascript
+````javascript
 const window = new SDLWindow('My Window', 800, 600)
 window.ref() // Increment reference count
 // ... use window ...
 window.unref() // Decrement reference count
 // Window will be destroyed when reference count reaches zero
-```
+
+
+### Renderer
+
+The Renderer API provides functionality to render graphics using SDL.
+
+```javascript
+const renderer = new SDLRenderer(window)
+````
+
+Parameters:
+
+- `window` (SDLWindow): The window instance to render to
+
+**Returns**: A new `SDLRenderer` instance
+
+> The renderer instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
+
+#### Methods
+
+##### `SDLRenderer.clear()`
+
+Clears the renderer with the current draw color.
+
+**Returns**: boolean indicating success
+
+##### `SDLRenderer.texture(texture)`
+
+Renders a texture to the renderer.
+
+Parameters:
+
+- `texture` (SDLTexture): The texture to render
+
+**Returns**: boolean indicating success
+
+##### `SDLRenderer.present()`
+
+Updates the screen with the rendered content.
+
+**Returns**: boolean indicating success
 
 ### Texture
 
@@ -77,46 +117,6 @@ Parameters:
 
 - `buffer` (Buffer): The pixel data buffer
 - `pitch` (number): The number of bytes per row
-
-**Returns**: boolean indicating success
-
-### Renderer
-
-The Renderer API provides functionality to render graphics using SDL.
-
-```javascript
-const renderer = new SDLRenderer(window)
-```
-
-Parameters:
-
-- `window` (SDLWindow): The window instance to render to
-
-**Returns**: A new `SDLRenderer` instance
-
-> The renderer instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
-
-#### Methods
-
-##### `SDLRenderer.clear()`
-
-Clears the renderer with the current draw color.
-
-**Returns**: boolean indicating success
-
-##### `SDLRenderer.texture(texture)`
-
-Renders a texture to the renderer.
-
-Parameters:
-
-- `texture` (SDLTexture): The texture to render
-
-**Returns**: boolean indicating success
-
-##### `SDLRenderer.present()`
-
-Updates the screen with the rendered content.
 
 **Returns**: boolean indicating success
 
