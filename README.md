@@ -37,13 +37,13 @@ Available flags are exposed through the `constants` object. Common flags include
 
 Example:
 
-````javascript
+```javascript
 const window = new SDLWindow('My Window', 800, 600)
 window.ref() // Increment reference count
 // ... use window ...
 window.unref() // Decrement reference count
 // Window will be destroyed when reference count reaches zero
-
+```
 
 ### Renderer
 
@@ -51,7 +51,7 @@ The Renderer API provides functionality to render graphics using SDL.
 
 ```javascript
 const renderer = new SDLRenderer(window)
-````
+```
 
 Parameters:
 
