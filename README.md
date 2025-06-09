@@ -17,12 +17,14 @@ const window = new SDLWindow(title, width, height, [flags])
 ```
 
 Parameters:
+
 - `title` (string): The window title
 - `width` (number): The window width in pixels
 - `height` (number): The window height in pixels
 - `flags` (number, optional): Window creation flags. Defaults to 0
 
 Available flags are exposed through the `constants` object. Common flags include:
+
 - `SDL_WINDOW_FULLSCREEN`: Fullscreen window
 - `SDL_WINDOW_BORDERLESS`: Borderless window
 - `SDL_WINDOW_RESIZABLE`: Resizable window
