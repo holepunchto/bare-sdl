@@ -50,7 +50,7 @@ window.unref() // Decrement reference count
 The Texture API provides functionality to create and manage SDL textures.
 
 ```javascript
-const texture = new SDLTexture(renderer, width, height[, pixelFormat, textureAccess])
+const texture = new SDLTexture(renderer, width, height[, pixelFormat[, textureAccess]])
 ```
 
 Parameters:
