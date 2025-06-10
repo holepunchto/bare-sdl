@@ -153,6 +153,7 @@ const keyboardEvent = new SDLEvent.Keyboard([event])
 ```
 
 Parameters:
+
 - `event` (SDLEvent, optional): The parent event instance. If not provided, a new event will be created.
 
 **Returns**: A new `SDLKeyboardEvent` instance
