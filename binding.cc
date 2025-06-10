@@ -28,6 +28,8 @@ static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
 bare_sdl__on_init(void) {
+  // Note: This is a way to prevent SDL to handle signals
+  SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
   SDL_Init(SDL_INIT_VIDEO);
 }
 
