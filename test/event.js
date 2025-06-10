@@ -11,6 +11,11 @@ test('Event class shouls expose a type getter initialized at zero', (t) => {
   t.ok(event.type == 0)
 })
 
+test('Event class shouls expose a key getter which returns Event.Keyboard', (t) => {
+  const event = new sdl.Event()
+  t.ok(event.key instanceof sdl.Event.Keyboard)
+})
+
 test('it should expose an Event.Keyboard class', (t) => {
   const event = new sdl.Event.Keyboard()
   t.ok(event)

@@ -120,6 +120,52 @@ Parameters:
 
 **Returns**: boolean indicating success
 
+### Event
+
+The Event API provides functionality to handle SDL events.
+
+```javascript
+const event = new SDLEvent()
+```
+
+**Returns**: A new `SDLEvent` instance
+
+#### Properties
+
+##### `SDLEvent.type`
+
+Gets the event type.
+
+**Returns**: number
+
+##### `SDLEvent.key`
+
+Gets the keyboard event data.
+
+**Returns**: `SDLKeyboardEvent` instance
+
+### Event.Keyboard
+
+The Keyboard Event API provides functionality to handle SDL keyboard events.
+
+```javascript
+const keyboardEvent = new SDLEvent.Keyboard([event])
+```
+
+Parameters:
+
+- `event` (SDLEvent, optional): The parent event instance. If not provided, a new event will be created.
+
+**Returns**: A new `SDLKeyboardEvent` instance
+
+#### Properties
+
+##### `SDLKeyboardEvent.scancode`
+
+Gets the keyboard scancode.
+
+**Returns**: number
+
 ## License
 
 Apache-2.0
