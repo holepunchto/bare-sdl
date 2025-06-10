@@ -166,6 +166,28 @@ Gets the keyboard scancode.
 
 **Returns**: number
 
+### Poller
+
+The Poller API provides functionality to poll for SDL events.
+
+```javascript
+const poller = new SDLPoller()
+```
+
+**Returns**: A new `SDLPoller` instance
+
+#### Methods
+
+##### `SDLPoller.poll(event)`
+
+Polls for events.
+
+Parameters:
+
+- `event` (SDLEvent): The event instance to store the polled event data
+
+**Returns**: boolean indicating if an event was polled
+
 ## License
 
 Apache-2.0
