@@ -13,7 +13,7 @@ npm i bare-sdl
 The Window API provides functionality to create SDL windows.
 
 ```javascript
-const window = new SDLWindow(title, width, height[, flags])
+const window = new sdl.Window(title, width, height[, flags])
 ```
 
 Parameters:
@@ -31,14 +31,14 @@ Available flags are exposed through the `constants` object. Common flags include
 - `SDL_WINDOW_VULKAN`: Window usable with Vulkan
 - `SDL_WINDOW_METAL`: Window usable with Metal
 
-**Returns**: A new `SDLWindow` instance
+**Returns**: A new `sdl.Window` instance
 
 > The window instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it. The window will be automatically destroyed when the reference count reaches zero.
 
 Example:
 
 ```javascript
-const window = new SDLWindow('My Window', 800, 600)
+const window = new sdl.Window('My Window', 800, 600)
 window.ref() // Increment reference count
 // ... use window ...
 window.unref() // Decrement reference count
@@ -50,36 +50,36 @@ window.unref() // Decrement reference count
 The Renderer API provides functionality to render graphics using SDL.
 
 ```javascript
-const renderer = new SDLRenderer(window)
+const renderer = new sdl.Renderer(window)
 ```
 
 Parameters:
 
-- `window` (SDLWindow): The window instance to render to
+- `window` (sdl.Window): The window instance to render to
 
-**Returns**: A new `SDLRenderer` instance
+**Returns**: A new `Renderer` instance
 
 > The renderer instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
 
 #### Methods
 
-##### `SDLRenderer.clear()`
+##### `Renderer.clear()`
 
 Clears the renderer with the current draw color.
 
 **Returns**: boolean indicating success
 
-##### `SDLRenderer.texture(texture)`
+##### `Renderer.texture(texture)`
 
 Renders a texture to the renderer.
 
 Parameters:
 
-- `texture` (SDLTexture): The texture to render
+- `texture` (sdl.Texture): The texture to render
 
 **Returns**: boolean indicating success
 
-##### `SDLRenderer.present()`
+##### `Renderer.present()`
 
 Updates the screen with the rendered content.
 
@@ -90,12 +90,12 @@ Updates the screen with the rendered content.
 The Texture API provides functionality to create and manage SDL textures.
 
 ```javascript
-const texture = new SDLTexture(renderer, width, height[, pixelFormat[, textureAccess]])
+const texture = new sdl.Texture(renderer, width, height[, pixelFormat[, textureAccess]])
 ```
 
 Parameters:
 
-- `renderer` (SDLRenderer): The renderer instance
+- `renderer` (sdl.Renderer): The renderer instance
 - `width` (number): The texture width in pixels
 - `height` (number): The texture height in pixels
 - `pixelFormat` (number, optional): The pixel format. Defaults to `SDL_PIXELFORMAT_RGB24`
@@ -103,13 +103,13 @@ Parameters:
 
 Available pixel formats and texture access flags are exposed through the `constants` object.
 
-**Returns**: A new `SDLTexture` instance
+**Returns**: A new `Texture` instance
 
 > The texture instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
 
 #### Methods
 
-##### `SDLTexture.update(buffer, pitch)`
+##### `Texture.update(buffer, pitch)`
 
 Updates the texture with new pixel data.
 
@@ -125,46 +125,68 @@ Parameters:
 The Event API provides functionality to handle SDL events.
 
 ```javascript
-const event = new SDLEvent()
+const event = new sdl.Event()
 ```
 
-**Returns**: A new `SDLEvent` instance
+**Returns**: A new `Event` instance
 
 #### Properties
 
-##### `SDLEvent.type`
+##### `Event.type`
 
 Gets the event type.
 
 **Returns**: number
 
-##### `SDLEvent.key`
+##### `Event.key`
 
 Gets the keyboard event data.
 
-**Returns**: `SDLKeyboardEvent` instance
+**Returns**: `Event.Keyboard` instance
 
 ### Event.Keyboard
 
 The Keyboard Event API provides functionality to handle SDL keyboard events.
 
 ```javascript
-const keyboardEvent = new SDLEvent.Keyboard([event])
+const keyboardEvent = new sdl.Event.Keyboard([event])
 ```
 
 Parameters:
 
-- `event` (SDLEvent, optional): The parent event instance. If not provided, a new event will be created.
+- `event` (sdl.Event, optional): The parent event instance. If not provided, a new event will be created.
 
-**Returns**: A new `SDLKeyboardEvent` instance
+**Returns**: A new `Event.Keyboard` instance
 
 #### Properties
 
-##### `SDLKeyboardEvent.scancode`
+##### `Event.Keyboard.scancode`
 
 Gets the keyboard scancode.
 
 **Returns**: number
+
+### Poller
+
+The Poller API provides functionality to poll for SDL events.
+
+```javascript
+const poller = new sdl.Poller()
+```
+
+**Returns**: A new `sdl.Poller` instance
+
+#### Methods
+
+##### `Poller.poll(event)`
+
+Polls for events.
+
+Parameters:
+
+- `event` (sdl.Event): The event instance to store the polled event data
+
+**Returns**: boolean indicating if an event was polled
 
 ## License
 
