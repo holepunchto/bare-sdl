@@ -1,3 +1,4 @@
+require('./test/audio')
 require('./test/event')
 require('./test/poller')
 require('./test/renderer')

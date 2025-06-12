@@ -3,6 +3,7 @@
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
 
 typedef struct {
   SDL_Window *handle;
@@ -15,6 +16,14 @@ typedef struct {
 typedef struct {
   SDL_Texture *handle;
 } bare_sdl_texture_t;
+
+typedef struct {
+  SDL_AudioStream *handle;
+} bare_sdl_audio_stream_t;
+
+typedef struct {
+  SDL_AudioDeviceID handle;
+} bare_sdl_audio_device_t;
 
 typedef struct {
   SDL_Event handle;
@@ -30,7 +39,7 @@ static void
 bare_sdl__on_init(void) {
   // Note: This is a way to prevent SDL to handle signals
   SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 }
 
 // Window
@@ -255,6 +264,189 @@ bare_sdl_get_event_key_scancode(
   js_arraybuffer_span_of_t<bare_sdl_keyboard_event_t, 1> key
 ) {
   return key->handle.scancode;
+}
+
+// Audio Stream
+
+static js_arraybuffer_t
+bare_sdl_create_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t source_format,
+  int source_channels,
+  int source_freq,
+  uint32_t target_format,
+  int target_channels,
+  int target_freq
+) {
+  int err;
+
+  js_arraybuffer_t handle;
+
+  bare_sdl_audio_stream_t *stream;
+  err = js_create_arraybuffer(env, stream, handle);
+  assert(err == 0);
+
+  SDL_AudioSpec source_spec = { (SDL_AudioFormat)source_format, source_channels, source_freq };
+  SDL_AudioSpec target_spec = { (SDL_AudioFormat)target_format, target_channels, target_freq };
+
+  stream->handle = SDL_CreateAudioStream(&source_spec, &target_spec);
+
+  if (stream->handle == nullptr) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  return handle;
+}
+
+static void
+bare_sdl_destroy_audio_stream(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  SDL_DestroyAudioStream(stream->handle);
+}
+
+static bool
+bare_sdl_put_audio_stream_data(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream,
+  js_arraybuffer_span_t buf,
+  uint32_t buf_offset,
+  int len
+) {
+  return SDL_PutAudioStreamData(stream->handle, &buf[buf_offset], len);
+}
+
+static int
+bare_sdl_get_audio_stream_data(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream,
+  js_arraybuffer_span_t buf,
+  uint32_t buf_offset,
+  int len
+) {
+  return SDL_GetAudioStreamData(stream->handle, &buf[buf_offset], len);
+}
+
+static int
+bare_sdl_get_audio_stream_available(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_GetAudioStreamAvailable(stream->handle);
+}
+
+static bool
+bare_sdl_flush_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_FlushAudioStream(stream->handle);
+}
+
+static bool
+bare_sdl_clear_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_ClearAudioStream(stream->handle);
+}
+
+// Audio Device
+
+static js_arraybuffer_t
+bare_sdl_open_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id,
+  uint32_t format,
+  int channels,
+  int freq
+) {
+  int err;
+
+  js_arraybuffer_t handle;
+
+  bare_sdl_audio_device_t *device;
+  err = js_create_arraybuffer(env, device, handle);
+  assert(err == 0);
+
+  SDL_AudioSpec spec = { (SDL_AudioFormat)format, channels, freq };
+  device->handle = SDL_OpenAudioDevice((SDL_AudioDeviceID)device_id, &spec);
+
+  if (device->handle == 0) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  return handle;
+}
+
+static void
+bare_sdl_close_audio_device(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_t, 1> device
+) {
+  SDL_CloseAudioDevice(device->handle);
+}
+
+static bool
+bare_sdl_pause_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_t, 1> device
+) {
+  return SDL_PauseAudioDevice(device->handle);
+}
+
+static bool
+bare_sdl_resume_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_t, 1> device
+) {
+  return SDL_ResumeAudioDevice(device->handle);
+}
+
+static bool
+bare_sdl_bind_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_t, 1> device,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_BindAudioStream(device->handle, stream->handle);
+}
+
+static void
+bare_sdl_unbind_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  SDL_UnbindAudioStream(stream->handle);
+}
+
+static uint32_t
+bare_sdl_get_audio_stream_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_GetAudioStreamDevice(stream->handle);
 }
 
 // Exports
@@ -684,6 +876,21 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V(SDL_SCANCODE_ENDCALL)
   V(SDL_SCANCODE_RESERVED)
   V(SDL_SCANCODE_COUNT)
+
+  V(SDL_AUDIO_U8)
+  V(SDL_AUDIO_S8)
+  V(SDL_AUDIO_S16LE)
+  V(SDL_AUDIO_S16BE)
+  V(SDL_AUDIO_S32LE)
+  V(SDL_AUDIO_S32BE)
+  V(SDL_AUDIO_F32LE)
+  V(SDL_AUDIO_F32BE)
+  V(SDL_AUDIO_S16)
+  V(SDL_AUDIO_S32)
+  V(SDL_AUDIO_F32)
+
+  V(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK)
+  V(SDL_AUDIO_DEVICE_DEFAULT_RECORDING)
 #undef V
 
 #define V(name, function) \
@@ -708,6 +915,22 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("getEventType", bare_sdl_get_event_type)
   V("getEventKey", bare_sdl_get_event_key)
   V("getEventKeyScancode", bare_sdl_get_event_key_scancode)
+
+  V("createAudioStream", bare_sdl_create_audio_stream)
+  V("destroyAudioStream", bare_sdl_destroy_audio_stream)
+  V("putAudioStreamData", bare_sdl_put_audio_stream_data)
+  V("getAudioStreamData", bare_sdl_get_audio_stream_data)
+  V("getAudioStreamAvailable", bare_sdl_get_audio_stream_available)
+  V("flushAudioStream", bare_sdl_flush_audio_stream)
+  V("clearAudioStream", bare_sdl_clear_audio_stream)
+
+  V("openAudioDevice", bare_sdl_open_audio_device)
+  V("closeAudioDevice", bare_sdl_close_audio_device)
+  V("pauseAudioDevice", bare_sdl_pause_audio_device)
+  V("resumeAudioDevice", bare_sdl_resume_audio_device)
+  V("bindAudioStream", bare_sdl_bind_audio_stream)
+  V("unbindAudioStream", bare_sdl_unbind_audio_stream)
+  V("getAudioStreamDevice", bare_sdl_get_audio_stream_device)
 #undef V
 
   return exports;
