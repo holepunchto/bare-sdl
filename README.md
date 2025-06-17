@@ -188,6 +188,10 @@ Parameters:
 
 **Returns**: boolean indicating if an event was polled
 
+## Examples
+
+- [Video playback with `bare-ffmpeg`](./example/video-playback.js)
+
 ## License
 
 Apache-2.0
