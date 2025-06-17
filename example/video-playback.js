@@ -1,5 +1,5 @@
 const ffmpeg = require('bare-ffmpeg')
-const sdl = require('..')
+const sdl = require('bare-sdl')
 
 // Log
 

@@ -188,7 +188,7 @@ Parameters:
 
 **Returns**: boolean indicating if an event was polled
 
-## Example
+## Examples
 
 - [Video playback with `bare-ffmpeg`](./example/video-playback.js)
 

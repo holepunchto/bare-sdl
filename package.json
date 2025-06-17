@@ -3,8 +3,8 @@
   "version": "1.0.0-3",
   "description": "Bare binding for SDL",
   "exports": {
-    "./package": "./package.json",
-    ".": "./index.js"
+    ".": "./index.js",
+    "./package": "./package.json"
   },
   "files": [
     "index.js",
