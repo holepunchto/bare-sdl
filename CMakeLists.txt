@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 
 find_package(cmake-bare REQUIRED PATHS node_modules/cmake-bare)
+find_package(cmake-harden REQUIRED PATHS node_modules/cmake-harden)
 find_package(cmake-fetch REQUIRED PATHS node_modules/cmake-fetch)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -14,6 +15,8 @@ set(SDL_STATIC ON CACHE BOOL "Build a static version of SDL" FORCE)
 fetch_package("github:libsdl-org/SDL#release-3.2.14")
 
 add_bare_module(bare_sdl)
+
+harden(${bare_sdl})
 
 set_target_properties(
   ${bare_sdl}
