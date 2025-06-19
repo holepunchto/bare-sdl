@@ -1,0 +1,10 @@
+{
+  "name": "bare-sdl-examples",
+  "description": "Example for bare-sdl module",
+  "author": "Holepunch",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "bare-ffmpeg": "file:../../bare-ffmpeg",
+    "bare-sdl": "file:.."
+  }
+}
