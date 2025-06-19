@@ -40,8 +40,8 @@ bare_sdl_create_window(
   js_env_t *env,
   js_receiver_t,
   std::string title,
-  uint32_t width,
-  uint32_t height,
+  int width,
+  int height,
   uint64_t flags
 ) {
   int err;
