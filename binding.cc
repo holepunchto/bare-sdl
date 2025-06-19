@@ -161,8 +161,8 @@ bare_sdl_create_texture(
 
   tex->handle = SDL_CreateTexture(
     ren->handle,
-    (SDL_PixelFormat) pixel_format,
-    (SDL_TextureAccess) texture_access,
+    static_cast<SDL_PixelFormat>(pixel_format),
+    static_cast<SDL_TextureAccess>(texture_access),
     width,
     height
   );
