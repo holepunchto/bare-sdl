@@ -35,6 +35,7 @@
     "brittle": "^3.1.1",
     "cmake-bare": "^1.1.6",
     "cmake-fetch": "^1.4.6",
+    "cmake-harden": "^1.1.2",
     "prettier": "^3.5.3",
     "prettier-config-standard": "^7.0.0"
   }
