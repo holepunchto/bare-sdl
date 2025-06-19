@@ -148,8 +148,8 @@ bare_sdl_create_texture(
   js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren,
   uint64_t pixel_format,
   uint64_t texture_access,
-  uint32_t width,
-  uint32_t height
+  int width,
+  int height
 ) {
   int err;
 
@@ -159,7 +159,13 @@ bare_sdl_create_texture(
   err = js_create_arraybuffer(env, tex, handle);
   assert(err == 0);
 
-  tex->handle = SDL_CreateTexture(ren->handle, (SDL_PixelFormat) pixel_format, (SDL_TextureAccess) texture_access, width, height);
+  tex->handle = SDL_CreateTexture(
+    ren->handle,
+    (SDL_PixelFormat) pixel_format,
+    (SDL_TextureAccess) texture_access,
+    width,
+    height
+  );
 
   if (tex->handle == nullptr) {
     err = js_throw_error(env, nullptr, SDL_GetError());
