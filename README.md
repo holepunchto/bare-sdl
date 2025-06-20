@@ -33,16 +33,19 @@ Available flags are exposed through the `constants` object. Common flags include
 
 **Returns**: A new `sdl.Window` instance
 
-> The window instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it. The window will be automatically destroyed when the reference count reaches zero.
+#### Methods
+
+##### `Window.destroy()`
+
+Destroy Window and associated resources.
+
+**Returns**: void
 
 Example:
 
 ```javascript
 const window = new sdl.Window('My Window', 800, 600)
-window.ref() // Increment reference count
-// ... use window ...
-window.unref() // Decrement reference count
-// Window will be destroyed when reference count reaches zero
+window.destroy()
 ```
 
 ### Renderer
@@ -58,8 +61,6 @@ Parameters:
 - `window` (sdl.Window): The window instance to render to
 
 **Returns**: A new `Renderer` instance
-
-> The renderer instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
 
 #### Methods
 
@@ -85,6 +86,12 @@ Updates the screen with the rendered content.
 
 **Returns**: boolean indicating success
 
+##### `Renderer.destroy()`
+
+Destroy Renderer and associated resources.
+
+**Returns**: void
+
 ### Texture
 
 The Texture API provides functionality to create and manage SDL textures.
@@ -105,8 +112,6 @@ Available pixel formats and texture access flags are exposed through the `consta
 
 **Returns**: A new `Texture` instance
 
-> The texture instance is reference counted. Use `.ref()` to increment the reference count and `.unref()` to decrement it.
-
 #### Methods
 
 ##### `Texture.update(buffer, pitch)`
@@ -119,6 +124,12 @@ Parameters:
 - `pitch` (number): The number of bytes per row
 
 **Returns**: boolean indicating success
+
+##### Texture.destroy()`
+
+Destroy Texture and associated resources.
+
+**Returns**: void
 
 ### Event
 
