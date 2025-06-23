@@ -6,22 +6,22 @@ SDL bindings for Bare.
 npm i bare-sdl
 ```
 
-## Documentation
+## API
 
-### Window
+### `Window`
 
-The Window API provides functionality to create SDL windows.
+The `Window` API provides functionality to create SDL windows.
 
-```javascript
+```js
 const window = new sdl.Window(title, width, height[, flags])
 ```
 
 Parameters:
 
-- `title` (string): The window title
-- `width` (number): The window width in pixels
-- `height` (number): The window height in pixels
-- `flags` (number, optional): Window creation flags. Defaults to 0
+- `title` (`string`): The window title
+- `width` (`number`): The window width in pixels
+- `height` (`number`): The window height in pixels
+- `flags` (`number`, optional): Window creation flags. Defaults to 0
 
 Available flags are exposed through the `constants` object. Common flags include:
 
@@ -37,28 +37,28 @@ Available flags are exposed through the `constants` object. Common flags include
 
 ##### `Window.destroy()`
 
-Destroy Window and associated resources.
+Destroy `Window` and associated resources.
 
-**Returns**: void
+**Returns**: `void`
 
 Example:
 
-```javascript
+```js
 const window = new sdl.Window('My Window', 800, 600)
 window.destroy()
 ```
 
-### Renderer
+### `Renderer`
 
-The Renderer API provides functionality to render graphics using SDL.
+The `Renderer` API provides functionality to render graphics using SDL.
 
-```javascript
+```js
 const renderer = new sdl.Renderer(window)
 ```
 
 Parameters:
 
-- `window` (sdl.Window): The window instance to render to
+- `window` (`sdl.Window`): The window instance to render to
 
 **Returns**: A new `Renderer` instance
 
@@ -68,7 +68,7 @@ Parameters:
 
 Clears the renderer with the current draw color.
 
-**Returns**: boolean indicating success
+**Returns**: `boolean` indicating success
 
 ##### `Renderer.texture(texture)`
 
@@ -76,37 +76,37 @@ Renders a texture to the renderer.
 
 Parameters:
 
-- `texture` (sdl.Texture): The texture to render
+- `texture` (`sdl.Texture`): The texture to render
 
-**Returns**: boolean indicating success
+**Returns**: `boolean` indicating success
 
 ##### `Renderer.present()`
 
 Updates the screen with the rendered content.
 
-**Returns**: boolean indicating success
+**Returns**: `boolean` indicating success
 
 ##### `Renderer.destroy()`
 
-Destroy Renderer and associated resources.
+Destroy `Renderer` and associated resources.
 
-**Returns**: void
+**Returns**: `void`
 
-### Texture
+### `Texture`
 
-The Texture API provides functionality to create and manage SDL textures.
+The `Texture` API provides functionality to create and manage SDL textures.
 
-```javascript
+```js
 const texture = new sdl.Texture(renderer, width, height[, pixelFormat[, textureAccess]])
 ```
 
 Parameters:
 
-- `renderer` (sdl.Renderer): The renderer instance
-- `width` (number): The texture width in pixels
-- `height` (number): The texture height in pixels
-- `pixelFormat` (number, optional): The pixel format. Defaults to `SDL_PIXELFORMAT_RGB24`
-- `textureAccess` (number, optional): The texture access pattern. Defaults to `SDL_TEXTUREACCESS_STREAMING`
+- `renderer` (`sdl.Renderer`): The renderer instance
+- `width` (`number`): The texture width in pixels
+- `height` (`number`): The texture height in pixels
+- `pixelFormat` (`number`, optional): The pixel format. Defaults to `SDL_PIXELFORMAT_RGB24`
+- `textureAccess` (`number`, optional): The texture access pattern. Defaults to `SDL_TEXTUREACCESS_STREAMING`
 
 Available pixel formats and texture access flags are exposed through the `constants` object.
 
@@ -120,22 +120,22 @@ Updates the texture with new pixel data.
 
 Parameters:
 
-- `buffer` (Buffer): The pixel data buffer
-- `pitch` (number): The number of bytes per row
+- `buffer` (`Buffer`): The pixel data buffer
+- `pitch` (`number`): The number of bytes per row
 
-**Returns**: boolean indicating success
+**Returns**: `boolean` indicating success
 
-##### Texture.destroy()`
+##### `Texture.destroy()`
 
-Destroy Texture and associated resources.
+Destroy `Texture` and associated resources.
 
-**Returns**: void
+**Returns**: `void`
 
-### Event
+### `Event`
 
-The Event API provides functionality to handle SDL events.
+The `Event` API provides functionality to handle SDL events.
 
-```javascript
+```js
 const event = new sdl.Event()
 ```
 
@@ -147,7 +147,7 @@ const event = new sdl.Event()
 
 Gets the event type.
 
-**Returns**: number
+**Returns**: `number`
 
 ##### `Event.key`
 
@@ -155,17 +155,17 @@ Gets the keyboard event data.
 
 **Returns**: `Event.Keyboard` instance
 
-### Event.Keyboard
+### `Event.Keyboard`
 
-The Keyboard Event API provides functionality to handle SDL keyboard events.
+The `Event.Keyboard` API provides functionality to handle SDL keyboard events.
 
-```javascript
+```js
 const keyboardEvent = new sdl.Event.Keyboard([event])
 ```
 
 Parameters:
 
-- `event` (sdl.Event, optional): The parent event instance. If not provided, a new event will be created.
+- `event` (`sdl.Event`, optional): The parent event instance. If not provided, a new event will be created.
 
 **Returns**: A new `Event.Keyboard` instance
 
@@ -175,13 +175,13 @@ Parameters:
 
 Gets the keyboard scancode.
 
-**Returns**: number
+**Returns**: `number`
 
-### Poller
+### `Poller`
 
-The Poller API provides functionality to poll for SDL events.
+The `Poller` API provides functionality to poll for SDL events.
 
-```javascript
+```js
 const poller = new sdl.Poller()
 ```
 
@@ -195,9 +195,9 @@ Polls for events.
 
 Parameters:
 
-- `event` (sdl.Event): The event instance to store the polled event data
+- `event` (`sdl.Event`): The event instance to store the polled event data
 
-**Returns**: boolean indicating if an event was polled
+**Returns**: `boolean` indicating if an event was polled
 
 ## Examples
 
