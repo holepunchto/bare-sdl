@@ -39,7 +39,7 @@ class Playback {
   }
 }
 
-let url = undefined
+let url
 if (Bare.platform === 'darwin') url = '0'
 if (Bare.platform === 'win32') url = 'video=FaceTime HD Camera'
 
