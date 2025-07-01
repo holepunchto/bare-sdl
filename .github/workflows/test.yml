@@ -39,6 +39,8 @@ jobs:
             libwayland-dev \
             xvfb
         if: ${{ matrix.platform == 'linux' }}
+      - run: choco upgrade llvm
+        if: ${{ matrix.platform == 'win32' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}
