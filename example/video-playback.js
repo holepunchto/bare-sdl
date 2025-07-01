@@ -98,7 +98,7 @@ rgb.pixelFormat = ffmpeg.constants.pixelFormats.RGB24
 rgb.alloc()
 
 const image = new ffmpeg.Image(
-  ffmpeg.constants.pixelFormats.RGBA,
+  ffmpeg.constants.pixelFormats.RGB24,
   rgb.width,
   rgb.height
 )
