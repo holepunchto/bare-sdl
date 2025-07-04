@@ -199,9 +199,206 @@ Parameters:
 
 **Returns**: `boolean` indicating if an event was polled
 
+### `AudioDevice`
+
+The `AudioDevice` API provides functionality to manage SDL audio devices for playback and recording.
+
+```js
+const device = await sdl.AudioDevice.open(deviceId[, spec])
+```
+
+Parameters:
+
+- `deviceId` (`number`): The audio device ID. Use `constants.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK` or `constants.SDL_AUDIO_DEVICE_DEFAULT_RECORDING` for defaults
+- `spec` (`object`, optional): Audio specification with the following properties:
+  - `format` (`number`): Audio format (e.g., `constants.SDL_AUDIO_F32`)
+  - `channels` (`number`): Number of audio channels (e.g., 2 for stereo)
+  - `freq` (`number`): Sample rate in Hz (e.g., 48000)
+
+**Returns**: A Promise that resolves to a new `AudioDevice` instance
+
+#### Static Methods
+
+##### `AudioDevice.playbackDeviceFormats()`
+
+Gets the audio formats supported by all playback devices.
+
+**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
+
+##### `AudioDevice.recordingDeviceFormats()`
+
+Gets the audio formats supported by all recording devices.
+
+**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
+
+##### `AudioDevice.playbackDevices()`
+
+Gets all available playback devices.
+
+**Returns**: `Promise<AudioDevice[]>` - Promise that resolves to an array of audio devices
+
+##### `AudioDevice.recordingDevices()`
+
+Gets all available recording devices.
+
+**Returns**: `Promise<AudioDevice[]>` - Promise that resolves to an array of audio devices
+
+##### `AudioDevice.defaultPlaybackDevice([spec])`
+
+Opens the default playback device.
+
+Parameters:
+
+- `spec` (`object`, optional): Audio specification (same as `open()`)
+
+**Returns**: `Promise<AudioDevice>` - Promise that resolves to the default playback device
+
+##### `AudioDevice.defaultRecordingDevice([spec])`
+
+Opens the default recording device.
+
+Parameters:
+
+- `spec` (`object`, optional): Audio specification (same as `open()`)
+
+**Returns**: `Promise<AudioDevice>` - Promise that resolves to the default recording device
+
+#### Properties
+
+##### `AudioDevice.name`
+
+Gets the device name.
+
+**Returns**: `string`
+
+##### `AudioDevice.format`
+
+Gets the audio device format.
+
+**Returns**: `AudioDeviceFormat` instance
+
+##### `AudioDevice.isPlaybackDevice`
+
+Indicates if this is a playback device.
+
+**Returns**: `boolean`
+
+##### `AudioDevice.isPhysicalDevice`
+
+Indicates if this is a physical device.
+
+**Returns**: `boolean`
+
+##### `AudioDevice.isPaused`
+
+Indicates if the device is paused.
+
+**Returns**: `boolean`
+
+##### `AudioDevice.gain`
+
+Gets or sets the device gain (volume).
+
+**Returns**: `number` (0.0 to 1.0)
+
+#### Methods
+
+##### `AudioDevice.ready()`
+
+Wait for the device to be ready.
+
+**Returns**: `Promise<void>`
+
+##### `AudioDevice.pause()`
+
+Pauses audio playback/recording.
+
+**Returns**: `boolean` indicating success
+
+##### `AudioDevice.resume()`
+
+Resumes audio playback/recording.
+
+**Returns**: `boolean` indicating success
+
+##### `AudioDevice.close()`
+
+Closes the audio device.
+
+**Returns**: `Promise<void>`
+
+### `AudioDevice.AudioDeviceFormat`
+
+Represents the format of an audio device.
+
+```js
+const format = new sdl.AudioDevice.AudioDeviceFormat(deviceId)
+```
+
+Parameters:
+
+- `deviceId` (`number`): The audio device ID
+
+**Returns**: A new `AudioDeviceFormat` instance
+
+#### Properties
+
+##### `AudioDeviceFormat.valid`
+
+Indicates if the format is valid.
+
+**Returns**: `boolean`
+
+##### `AudioDeviceFormat.sampleFrames`
+
+Gets the number of sample frames.
+
+**Returns**: `number`
+
+##### `AudioDeviceFormat.spec`
+
+Gets the audio specification.
+
+**Returns**: `AudioSpec` instance
+
+### `AudioDevice.AudioSpec`
+
+Represents an audio specification.
+
+```js
+const spec = new sdl.AudioDevice.AudioSpec(format)
+```
+
+Parameters:
+
+- `format` (`AudioDeviceFormat`): The audio device format
+
+**Returns**: A new `AudioSpec` instance
+
+#### Properties
+
+##### `AudioSpec.format`
+
+Gets the audio format.
+
+**Returns**: `number` (e.g., `constants.SDL_AUDIO_F32`)
+
+##### `AudioSpec.channels`
+
+Gets the number of channels.
+
+**Returns**: `number`
+
+##### `AudioSpec.freq`
+
+Gets the sample rate in Hz.
+
+**Returns**: `number`
+
 ## Examples
 
-- [Video playback with `bare-ffmpeg`](./example/video-playback.js)
+- [Video playback with `bare-ffmpeg`](./examples/video-playback.js)
+- [List available audio playback and recording devices](./examples/audio-device-list.js)
 
 ## License
 

@@ -1,4 +1,5 @@
 exports.constants = require('./lib/constants')
+exports.AudioDevice = require('./lib/audio-device')
 exports.Event = require('./lib/event')
 exports.Poller = require('./lib/poller')
 exports.Renderer = require('./lib/renderer')
