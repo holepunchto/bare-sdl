@@ -27,7 +27,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - uses: sethvincent/sound-ci-helpers@windows-updates
+      - uses: ./.github/actions/virtual-audio-device
+        with:
+          platform: ${{ matrix.platform }}
       - run: |
           choco install vb-cable -y
           choco upgrade llvm

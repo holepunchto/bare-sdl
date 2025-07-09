@@ -204,7 +204,7 @@ Parameters:
 The `AudioDevice` API provides functionality to manage SDL audio devices for playback and recording.
 
 ```js
-const device = await sdl.AudioDevice.open(deviceId[, spec])
+const device = new sdl.AudioDevice(deviceId[, spec])
 ```
 
 Parameters:
@@ -215,53 +215,7 @@ Parameters:
   - `channels` (`number`): Number of audio channels (e.g., 2 for stereo)
   - `freq` (`number`): Sample rate in Hz (e.g., 48000)
 
-**Returns**: A Promise that resolves to a new `AudioDevice` instance
-
-#### Static Methods
-
-##### `AudioDevice.playbackDeviceFormats()`
-
-Gets the audio formats supported by all playback devices.
-
-**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
-
-##### `AudioDevice.recordingDeviceFormats()`
-
-Gets the audio formats supported by all recording devices.
-
-**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
-
-##### `AudioDevice.playbackDevices()`
-
-Gets all available playback devices.
-
-**Returns**: `Promise<AudioDevice[]>` - Promise that resolves to an array of audio devices
-
-##### `AudioDevice.recordingDevices()`
-
-Gets all available recording devices.
-
-**Returns**: `Promise<AudioDevice[]>` - Promise that resolves to an array of audio devices
-
-##### `AudioDevice.defaultPlaybackDevice([spec])`
-
-Opens the default playback device.
-
-Parameters:
-
-- `spec` (`object`, optional): Audio specification (same as `open()`)
-
-**Returns**: `Promise<AudioDevice>` - Promise that resolves to the default playback device
-
-##### `AudioDevice.defaultRecordingDevice([spec])`
-
-Opens the default recording device.
-
-Parameters:
-
-- `spec` (`object`, optional): Audio specification (same as `open()`)
-
-**Returns**: `Promise<AudioDevice>` - Promise that resolves to the default recording device
+**Returns**: A new `AudioDevice` instance
 
 #### Properties
 
@@ -303,12 +257,6 @@ Gets or sets the device gain (volume).
 
 #### Methods
 
-##### `AudioDevice.ready()`
-
-Wait for the device to be ready.
-
-**Returns**: `Promise<void>`
-
 ##### `AudioDevice.pause()`
 
 Pauses audio playback/recording.
@@ -325,7 +273,53 @@ Resumes audio playback/recording.
 
 Closes the audio device.
 
-**Returns**: `Promise<void>`
+**Returns**: `void`
+
+#### Static Methods
+
+##### `AudioDevice.playbackDeviceFormats()`
+
+Gets the audio formats supported by all playback devices.
+
+**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
+
+##### `AudioDevice.recordingDeviceFormats()`
+
+Gets the audio formats supported by all recording devices.
+
+**Returns**: `AudioDeviceFormat[]` - Array of audio device formats
+
+##### `AudioDevice.playbackDevices()`
+
+Gets all available playback devices.
+
+**Returns**: `AudioDevice[]` - An array of audio devices
+
+##### `AudioDevice.recordingDevices()`
+
+Gets all available recording devices.
+
+**Returns**: `AudioDevice[]` - An array of audio devices
+
+##### `AudioDevice.defaultPlaybackDevice([spec])`
+
+Creates a new instance of `AudioDevice` for the default audio playback device. Equivalent to calling `new AudioDevice(constants.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, spec)`
+
+Parameters:
+
+- `spec` (`object`, optional): Audio specification (same as `open()`)
+
+**Returns**: `AudioDevice` - The default playback device
+
+##### `AudioDevice.defaultRecordingDevice([spec])`
+
+Creates a new instance of `AudioDevice` for the default audio recording device. Equivalent to calling `new AudioDevice(constants.SDL_AUDIO_DEVICE_DEFAULT_RECORDING, spec)`
+
+Parameters:
+
+- `spec` (`object`, optional): Audio specification (same as `open()`)
+
+**Returns**: `AudioDevice` - The default recording device
 
 ### `AudioDevice.AudioDeviceFormat`
 

@@ -285,10 +285,11 @@ bare_sdl_open_audio_device(
 ) {
   int err;
 
+  SDL_AudioSpec spec;
   SDL_AudioSpec *spec_ptr = nullptr;
   if (format.has_value() && channels.has_value() && freq.has_value()) {
-    SDL_AudioSpec spec = {
-      .format = (SDL_AudioFormat) format.value(),
+    spec = {
+      .format = static_cast<SDL_AudioFormat>(format.value()),
       .channels = channels.value(),
       .freq = freq.value()
     };
@@ -390,14 +391,14 @@ bare_sdl_get_audio_device_list_item(
   return (uint32_t) list->devices[index];
 }
 
-static std::string
+static std::optional<std::string>
 bare_sdl_get_audio_device_name(
   js_env_t *env,
   js_receiver_t,
   uint32_t device_id
 ) {
   const char *name = SDL_GetAudioDeviceName((SDL_AudioDeviceID) device_id);
-  return name ? std::string(name) : std::string("");
+  return name;
 }
 
 static double

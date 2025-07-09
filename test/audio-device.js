@@ -11,30 +11,29 @@ test('sdl.AudioDevice - recordingDeviceFormats', (t) => {
   t.ok(Array.isArray(formats), 'returns an array')
 })
 
-test('sdl.AudioDevice - playbackDevices', async (t) => {
-  const devices = await sdl.AudioDevice.playbackDevices()
+test('sdl.AudioDevice - playbackDevices', (t) => {
+  const devices = sdl.AudioDevice.playbackDevices()
   t.ok(Array.isArray(devices), 'returns an array')
 })
 
-test('sdl.AudioDevice - recordingDevices', async (t) => {
-  const devices = await sdl.AudioDevice.recordingDevices()
+test('sdl.AudioDevice - recordingDevices', (t) => {
+  const devices = sdl.AudioDevice.recordingDevices()
   t.ok(Array.isArray(devices), 'returns an array')
 })
 
-test('sdl.AudioDevice - defaultRecordingDevice', async (t) => {
-  const device = await sdl.AudioDevice.defaultRecordingDevice()
+test('sdl.AudioDevice - defaultRecordingDevice', (t) => {
+  const device = sdl.AudioDevice.defaultRecordingDevice()
   t.ok(device instanceof sdl.AudioDevice, 'returns sdl.AudioDevice instance')
 })
 
-test('sdl.AudioDevice - defaultPlaybackDevice', async (t) => {
-  const device = await sdl.AudioDevice.defaultPlaybackDevice()
+test('sdl.AudioDevice - defaultPlaybackDevice', (t) => {
+  const device = sdl.AudioDevice.defaultPlaybackDevice()
   t.ok(device instanceof sdl.AudioDevice, 'returns sdl.AudioDevice instance')
 })
 
-test('sdl.AudioDevice - properties', async (t) => {
+test('sdl.AudioDevice - properties', (t) => {
   const spec = { format: sdl.constants.SDL_AUDIO_F32, channels: 2, freq: 48000 }
-  const device = await sdl.AudioDevice.defaultPlaybackDevice(spec)
-  await device.ready()
+  using device = sdl.AudioDevice.defaultPlaybackDevice(spec)
 
   t.ok(typeof device.name === 'string')
   t.ok(device.format instanceof sdl.AudioDevice.AudioDeviceFormat)
@@ -44,16 +43,15 @@ test('sdl.AudioDevice - properties', async (t) => {
   t.is(typeof device.gain, 'number')
 })
 
-test('sdl.AudioDevice - set gain', async (t) => {
-  const device = await sdl.AudioDevice.defaultPlaybackDevice()
-  await device.ready()
+test('sdl.AudioDevice - set gain', (t) => {
+  using device = sdl.AudioDevice.defaultPlaybackDevice()
   device.gain = 0.5
   t.is(device.gain, 0.5, 'sets gain correctly')
 })
 
-test('sdl.AudioDevice - pause/resume', async (t) => {
-  const device = await sdl.AudioDevice.defaultPlaybackDevice()
-  await device.ready()
+test('sdl.AudioDevice - pause/resume', (t) => {
+  const device = sdl.AudioDevice.defaultPlaybackDevice()
+
   {
     const result = device.pause()
     t.ok(typeof result === 'boolean')
@@ -65,8 +63,8 @@ test('sdl.AudioDevice - pause/resume', async (t) => {
   }
 })
 
-test('SDLAudioSpec', async (t) => {
-  const device = await sdl.AudioDevice.defaultPlaybackDevice()
+test('SDLAudioSpec', (t) => {
+  using device = sdl.AudioDevice.defaultPlaybackDevice()
   const format = new sdl.AudioDevice.AudioDeviceFormat(device.id)
   const spec = new sdl.AudioDevice.AudioSpec(format)
   t.ok(spec && spec._format)
