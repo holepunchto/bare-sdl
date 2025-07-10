@@ -387,7 +387,7 @@ bare_sdl_get_audio_device_list_item(
     return std::nullopt;
   }
 
-  return (uint32_t) list->devices[index];
+  return uint32_t(list->devices[index]);
 }
 
 static std::optional<std::string>
