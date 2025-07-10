@@ -300,8 +300,7 @@ bare_sdl_open_audio_device(
   auto logical_device_id = SDL_OpenAudioDevice((SDL_AudioDeviceID) requested_device_id, spec_ptr);
 
   if (logical_device_id == 0) {
-    const char *sdl_error = SDL_GetError();
-    err = js_throw_error(env, nullptr, sdl_error);
+    err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
