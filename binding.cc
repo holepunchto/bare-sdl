@@ -384,7 +384,7 @@ bare_sdl_get_audio_device_list_item(
   int index
 ) {
   if (index < 0 || index >= list->count || !list->devices) {
-    return NULL;
+    return std::nullopt;
   }
 
   return (uint32_t) list->devices[index];
