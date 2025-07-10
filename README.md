@@ -209,7 +209,7 @@ const device = new sdl.AudioDevice(deviceId[, spec])
 
 Parameters:
 
-- `deviceId` (`number`): The audio device ID. Use `constants.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK` or `constants.SDL_AUDIO_DEVICE_DEFAULT_RECORDING` for defaults
+- `deviceId` (`number`): The audio device ID. Use `constants.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK` or `constants.SDL_AUDIO_DEVICE_DEFAULT_RECORDING` for defaults.
 - `spec` (`object`, optional): Audio specification with the following properties:
   - `format` (`number`): Audio format (e.g., `constants.SDL_AUDIO_F32`)
   - `channels` (`number`): Number of audio channels (e.g., 2 for stereo)
