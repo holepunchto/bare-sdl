@@ -1,0 +1,18 @@
+name: 'virtual-audio-device'
+description: 'set up virtual audio devices for win32, linux, darwin'
+inputs:
+  platform:
+    description: 'Target platform'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - run: '${{ github.action_path }}/linux/setup_sound.sh'
+      shell: bash -e {0}
+      if: ${{ inputs.platform == 'linux' }}
+    - run: '${{ github.action_path }}/macos/setup_sound.sh'
+      shell: bash -e {0}
+      if: ${{ inputs.platform == 'darwin' }}
+    - run: '${{ github.action_path }}/windows/setup_sound.ps1'
+      shell: powershell -Command {0}
+      if: ${{ inputs.platform == 'win32' }}

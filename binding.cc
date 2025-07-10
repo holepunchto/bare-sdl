@@ -24,13 +24,24 @@ typedef struct {
   SDL_KeyboardEvent handle;
 } bare_sdl_keyboard_event_t;
 
+typedef struct {
+  SDL_AudioDeviceID *devices;
+  int count;
+} bare_sdl_audio_device_list_t;
+
+typedef struct {
+  SDL_AudioSpec spec;
+  int sample_frames;
+  bool valid;
+} bare_sdl_audio_device_format_t;
+
 static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
 bare_sdl__on_init(void) {
   // Note: This is a way to prevent SDL to handle signals
   SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 }
 
 // Window
@@ -261,6 +272,246 @@ bare_sdl_get_event_key_scancode(
   js_arraybuffer_span_of_t<bare_sdl_keyboard_event_t, 1> key
 ) {
   return key->handle.scancode;
+}
+
+static uint32_t
+bare_sdl_open_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t requested_device_id,
+  std::optional<uint32_t> format,
+  std::optional<int> channels,
+  std::optional<int> freq
+) {
+  int err;
+
+  SDL_AudioSpec spec;
+  SDL_AudioSpec *spec_ptr = nullptr;
+  if (format.has_value() && channels.has_value() && freq.has_value()) {
+    spec = {
+      .format = static_cast<SDL_AudioFormat>(format.value()),
+      .channels = channels.value(),
+      .freq = freq.value()
+    };
+
+    spec_ptr = &spec;
+  }
+
+  auto logical_device_id = SDL_OpenAudioDevice((SDL_AudioDeviceID) requested_device_id, spec_ptr);
+
+  if (logical_device_id == 0) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  return logical_device_id;
+}
+
+static void
+bare_sdl_close_audio_device(
+  js_env_t *,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  SDL_CloseAudioDevice((SDL_AudioDeviceID) device_id);
+}
+
+static bool
+bare_sdl_pause_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  return SDL_PauseAudioDevice(device_id);
+}
+
+static bool
+bare_sdl_resume_audio_device(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  return SDL_ResumeAudioDevice(device_id);
+}
+
+static std::vector<uint32_t>
+bare_sdl_get_audio_playback_devices(
+  js_env_t *env,
+  js_receiver_t
+) {
+  int count = 0;
+  SDL_AudioDeviceID *devices = SDL_GetAudioPlaybackDevices(&count);
+
+  std::vector<uint32_t> list;
+
+  if (devices != nullptr) {
+    for (int i = 0; i < count; i++) {
+      list.push_back(devices[i]);
+    }
+    SDL_free(devices);
+  }
+
+  return list;
+}
+
+static std::vector<uint32_t>
+bare_sdl_get_audio_recording_devices(
+  js_env_t *env,
+  js_receiver_t
+) {
+  int count = 0;
+  SDL_AudioDeviceID *devices = SDL_GetAudioRecordingDevices(&count);
+
+  std::vector<uint32_t> list;
+
+  if (devices != nullptr) {
+    for (int i = 0; i < count; i++) {
+      list.push_back(devices[i]);
+    }
+    SDL_free(devices);
+  }
+
+  return list;
+}
+
+static std::optional<uint32_t>
+bare_sdl_get_audio_device_list_item(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_list_t, 1> list,
+  int index
+) {
+  if (index < 0 || index >= list->count || !list->devices) {
+    return std::nullopt;
+  }
+
+  return uint32_t(list->devices[index]);
+}
+
+static std::optional<std::string>
+bare_sdl_get_audio_device_name(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  const char *name = SDL_GetAudioDeviceName((SDL_AudioDeviceID) device_id);
+  return name;
+}
+
+static double
+bare_sdl_get_audio_device_gain(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  return SDL_GetAudioDeviceGain((SDL_AudioDeviceID) device_id);
+}
+
+static void
+bare_sdl_set_audio_device_gain(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id,
+  double gain
+) {
+  SDL_SetAudioDeviceGain((SDL_AudioDeviceID) device_id, (float) gain);
+}
+
+static js_arraybuffer_t
+bare_sdl_get_audio_device_format(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  int err;
+
+  js_arraybuffer_t handle;
+
+  bare_sdl_audio_device_format_t *format;
+  err = js_create_arraybuffer(env, format, handle);
+  assert(err == 0);
+
+  format->valid = SDL_GetAudioDeviceFormat(
+    (SDL_AudioDeviceID) device_id,
+    &format->spec,
+    &format->sample_frames
+  );
+
+  return handle;
+}
+
+static bool
+bare_sdl_get_audio_device_format_valid(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
+) {
+  return format->valid;
+}
+
+static uint32_t
+bare_sdl_get_audio_device_format_format(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
+) {
+  return (uint32_t) format->spec.format;
+}
+
+static int
+bare_sdl_get_audio_device_format_channels(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
+) {
+  return format->spec.channels;
+}
+
+static int
+bare_sdl_get_audio_device_format_freq(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
+) {
+  return format->spec.freq;
+}
+
+static int
+bare_sdl_get_audio_device_format_sample_frames(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
+) {
+  return format->sample_frames;
+}
+
+static bool
+bare_sdl_is_audio_device_physical(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t deviceId
+) {
+  return SDL_IsAudioDevicePhysical((SDL_AudioDeviceID) deviceId);
+}
+
+static bool
+bare_sdl_is_audio_device_playback(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t deviceId
+) {
+  return SDL_IsAudioDevicePlayback((SDL_AudioDeviceID) deviceId);
+}
+
+static bool
+bare_sdl_is_audio_device_paused(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t deviceId
+) {
+  return SDL_AudioDevicePaused((SDL_AudioDeviceID) deviceId);
 }
 
 // Exports
@@ -690,6 +941,21 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V(SDL_SCANCODE_ENDCALL)
   V(SDL_SCANCODE_RESERVED)
   V(SDL_SCANCODE_COUNT)
+
+  V(SDL_AUDIO_U8)
+  V(SDL_AUDIO_S8)
+  V(SDL_AUDIO_S16LE)
+  V(SDL_AUDIO_S16BE)
+  V(SDL_AUDIO_S32LE)
+  V(SDL_AUDIO_S32BE)
+  V(SDL_AUDIO_F32LE)
+  V(SDL_AUDIO_F32BE)
+  V(SDL_AUDIO_S16)
+  V(SDL_AUDIO_S32)
+  V(SDL_AUDIO_F32)
+
+  V(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK)
+  V(SDL_AUDIO_DEVICE_DEFAULT_RECORDING)
 #undef V
 
 #define V(name, function) \
@@ -714,6 +980,26 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("getEventType", bare_sdl_get_event_type)
   V("getEventKey", bare_sdl_get_event_key)
   V("getEventKeyScancode", bare_sdl_get_event_key_scancode)
+
+  V("openAudioDevice", bare_sdl_open_audio_device)
+  V("closeAudioDevice", bare_sdl_close_audio_device)
+  V("pauseAudioDevice", bare_sdl_pause_audio_device)
+  V("resumeAudioDevice", bare_sdl_resume_audio_device)
+  V("getAudioPlaybackDevices", bare_sdl_get_audio_playback_devices)
+  V("getAudioRecordingDevices", bare_sdl_get_audio_recording_devices)
+  V("getAudioDeviceListItem", bare_sdl_get_audio_device_list_item)
+  V("getAudioDeviceName", bare_sdl_get_audio_device_name)
+  V("getAudioDeviceGain", bare_sdl_get_audio_device_gain)
+  V("setAudioDeviceGain", bare_sdl_set_audio_device_gain)
+  V("getAudioDeviceFormat", bare_sdl_get_audio_device_format)
+  V("getAudioDeviceFormatValid", bare_sdl_get_audio_device_format_valid)
+  V("getAudioDeviceFormatFormat", bare_sdl_get_audio_device_format_format)
+  V("getAudioDeviceFormatChannels", bare_sdl_get_audio_device_format_channels)
+  V("getAudioDeviceFormatFreq", bare_sdl_get_audio_device_format_freq)
+  V("getAudioDeviceFormatSampleFrames", bare_sdl_get_audio_device_format_sample_frames)
+  V("isAudioDevicePhysical", bare_sdl_is_audio_device_physical)
+  V("isAudioDevicePlayback", bare_sdl_is_audio_device_playback)
+  V("isAudioDevicePaused", bare_sdl_is_audio_device_paused)
 #undef V
 
   return exports;
