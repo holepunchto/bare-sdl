@@ -2,26 +2,7 @@ const test = require('brittle')
 const env = require('bare-env')
 const { isLinux } = require('which-runtime')
 const sdl = require('..')
-
-test('sdl.AudioDevice - playbackDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.playbackDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.recordingDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - playbackDevices', (t) => {
-  const devices = sdl.AudioDevice.playbackDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDevices', (t) => {
-  const devices = sdl.AudioDevice.recordingDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
+const { hasRecordingDevice, hasPlaybackDevice } = require('./helpers/index')
 
 if (env.CI && isLinux) {
   // Devices are not available in ci
