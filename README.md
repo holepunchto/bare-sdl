@@ -257,6 +257,26 @@ Gets or sets the device gain (volume).
 
 #### Methods
 
+##### `AudioDevice.bindStream(stream)`
+
+Binds an audio stream to this device for playback or recording.
+
+Parameters:
+
+- `stream` (`AudioStream`): The audio stream to bind
+
+**Returns**: `boolean` indicating success
+
+##### `AudioDevice.unbindStream(stream)`
+
+Unbinds an audio stream from this device.
+
+Parameters:
+
+- `stream` (`AudioStream`): The audio stream to unbind
+
+**Returns**: `void`
+
 ##### `AudioDevice.pause()`
 
 Pauses audio playback/recording.
@@ -388,6 +408,95 @@ Gets the number of channels.
 Gets the sample rate in Hz.
 
 **Returns**: `number`
+
+### `AudioStream`
+
+The `AudioStream` API provides functionality to manage SDL audio streams for format conversion, resampling, and device binding.
+
+```js
+const stream = new sdl.AudioStream(sourceSpec, targetSpec)
+```
+
+Parameters:
+
+- `sourceSpec` (`object`): Source audio specification with the following properties:
+  - `format` (`number`): Audio format (e.g., `constants.SDL_AUDIO_F32`)
+  - `channels` (`number`): Number of audio channels (e.g., 2 for stereo)
+  - `freq` (`number`): Sample rate in Hz (e.g., 44100)
+- `targetSpec` (`object`): Target audio specification with the following properties:
+  - `format` (`number`): Audio format (e.g., `constants.SDL_AUDIO_F32`)
+  - `channels` (`number`): Number of audio channels (e.g., 2 for stereo)
+  - `freq` (`number`): Sample rate in Hz (e.g., 44100)
+
+**Returns**: A new `AudioStream` instance
+
+#### Methods
+
+##### `AudioStream.put(buffer[, offset[, length]])`
+
+Puts audio data into the stream for processing.
+
+Parameters:
+
+- `buffer` (`ArrayBuffer`): The audio data buffer
+- `offset` (`number`, optional): The offset in bytes. Defaults to 0
+- `length` (`number`, optional): The number of bytes to put. Defaults to `buffer.byteLength - offset`
+
+**Returns**: `boolean` indicating success
+
+##### `AudioStream.get(buffer[, offset[, length]])`
+
+Gets processed audio data from the stream.
+
+Parameters:
+
+- `buffer` (`ArrayBuffer`): The buffer to store the audio data
+- `offset` (`number`, optional): The offset in bytes. Defaults to 0
+- `length` (`number`, optional): The number of bytes to get. Defaults to `buffer.byteLength - offset`
+
+**Returns**: `number` - The number of bytes read
+
+##### `AudioStream.available`
+
+Gets the number of bytes available for reading from the stream.
+
+**Returns**: `number`
+
+##### `AudioStream.flush()`
+
+Flushes any remaining audio data in the stream.
+
+**Returns**: `boolean` indicating success
+
+##### `AudioStream.clear()`
+
+Clears all audio data from the stream.
+
+**Returns**: `boolean` indicating success
+
+##### `AudioStream.device`
+
+Gets the ID of the bound audio device.
+
+**Returns**: `number` - The device ID (0 if not bound)
+
+##### `AudioStream.createReadStream()`
+
+Creates a readable stream for getting audio data.
+
+**Returns**: `Readable` stream
+
+##### `AudioStream.createWriteStream()`
+
+Creates a writable stream for putting audio data.
+
+**Returns**: `Writable` stream
+
+##### `AudioStream.destroy()`
+
+Destroys the audio stream and frees associated resources.
+
+**Returns**: `void`
 
 ## Examples
 

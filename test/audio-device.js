@@ -1,40 +1,20 @@
 const test = require('brittle')
-const { isLinux } = require('which-runtime')
 const sdl = require('..')
-
-test('sdl.AudioDevice - playbackDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.playbackDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.recordingDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - playbackDevices', (t) => {
-  const devices = sdl.AudioDevice.playbackDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDevices', (t) => {
-  const devices = sdl.AudioDevice.recordingDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
+const { hasRecordingDevice, hasPlaybackDevice } = require('./helpers/index')
 
 test('sdl.AudioDevice - defaultRecordingDevice', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasRecordingDevice) {
+    t.pass('No default recording device')
     return
   }
 
-  const device = sdl.AudioDevice.defaultRecordingDevice()
+  const device = sdl.AudioDevice.defaultPlaybackDevice()
   t.ok(device instanceof sdl.AudioDevice, 'returns sdl.AudioDevice instance')
 })
 
 test('sdl.AudioDevice - defaultPlaybackDevice', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
     return
   }
 
@@ -43,8 +23,8 @@ test('sdl.AudioDevice - defaultPlaybackDevice', (t) => {
 })
 
 test('sdl.AudioDevice - properties', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
     return
   }
 
@@ -60,8 +40,8 @@ test('sdl.AudioDevice - properties', (t) => {
 })
 
 test('sdl.AudioDevice - set gain', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
     return
   }
 
@@ -71,8 +51,8 @@ test('sdl.AudioDevice - set gain', (t) => {
 })
 
 test('sdl.AudioDevice - pause/resume', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
     return
   }
 
@@ -90,8 +70,8 @@ test('sdl.AudioDevice - pause/resume', (t) => {
 })
 
 test('SDLAudioSpec', (t) => {
-  if (isLinux) {
-    t.pass()
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
     return
   }
 

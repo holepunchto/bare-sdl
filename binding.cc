@@ -1,8 +1,12 @@
+#include "SDL3/SDL_audio.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
+
+using bare_sdl_audio_stream_get_callback_t = js_function_t<void, int, int>;
+using bare_sdl_audio_stream_put_callback_t = js_function_t<void, int, int>;
 
 typedef struct {
   SDL_Window *handle;
@@ -23,6 +27,23 @@ typedef struct {
 typedef struct {
   SDL_KeyboardEvent handle;
 } bare_sdl_keyboard_event_t;
+
+typedef struct bare_sdl_audio_stream_s {
+  SDL_AudioStream *handle;
+  js_env_t *env;
+  js_persistent_t<bare_sdl_audio_stream_get_callback_t> on_get;
+  js_persistent_t<bare_sdl_audio_stream_put_callback_t> on_put;
+
+  uv_async_t async_get;
+  uv_async_t async_put;
+  uv_mutex_t mutex;
+
+  int get_needed_bytes;
+  int get_total_bytes;
+  int put_added_bytes;
+  int put_total_bytes;
+  int pending_closes;
+} bare_sdl_audio_stream_t;
 
 typedef struct {
   SDL_AudioDeviceID *devices;
@@ -272,6 +293,294 @@ bare_sdl_get_event_key_scancode(
   js_arraybuffer_span_of_t<bare_sdl_keyboard_event_t, 1> key
 ) {
   return key->handle.scancode;
+}
+
+static void on_audio_stream_get(uv_async_t *handle);
+
+static void
+audio_stream_get_callback(void *userdata, SDL_AudioStream *sdl_stream, int needed_bytes, int total_bytes) {
+  auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(userdata);
+  uv_loop_t *loop;
+  int err = js_get_env_loop(stream->env, &loop);
+  assert(err == 0);
+
+
+  uv_mutex_lock(&stream->mutex);
+  stream->get_needed_bytes = needed_bytes;
+  stream->get_total_bytes = total_bytes;
+  uv_mutex_unlock(&stream->mutex);
+  uv_async_send(&stream->async_get);
+}
+
+static void
+on_audio_stream_get(uv_async_t *handle) {
+  auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(handle->data);
+  auto env = stream->env;
+  if (!stream->on_get) {
+    return;
+  }
+
+  js_handle_scope_t *scope;
+  int err = js_open_handle_scope(env, &scope);
+  assert(err == 0);
+
+  uv_mutex_lock(&stream->mutex);
+  int needed_bytes = stream->get_needed_bytes;
+  int total_bytes = stream->get_total_bytes;
+  uv_mutex_unlock(&stream->mutex);
+
+  bare_sdl_audio_stream_get_callback_t callback;
+  err = js_get_reference_value(env, stream->on_get, callback);
+  assert(err == 0);
+
+  js_call_function(env, callback, needed_bytes, total_bytes);
+
+  js_close_handle_scope(env, scope);
+}
+
+static void
+audio_stream_put_callback(void *userdata, SDL_AudioStream *sdl_stream, int added_bytes, int total_bytes) {
+  auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(userdata);
+  uv_mutex_lock(&stream->mutex);
+  stream->put_added_bytes = added_bytes;
+  stream->put_total_bytes = total_bytes;
+  uv_mutex_unlock(&stream->mutex);
+  uv_async_send(&stream->async_put);
+}
+
+static void
+on_audio_stream_put(uv_async_t *handle) {
+  int err;
+
+  auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(handle->data);
+  auto env = stream->env;
+
+  if (!stream->on_put) {
+    return;
+  }
+
+  js_handle_scope_t *scope;
+  err = js_open_handle_scope(env, &scope);
+  assert(err == 0);
+
+  uv_mutex_lock(&stream->mutex);
+  int added_bytes = stream->put_added_bytes;
+  int total_bytes = stream->put_total_bytes;
+  uv_mutex_unlock(&stream->mutex);
+
+  bare_sdl_audio_stream_put_callback_t callback;
+  err = js_get_reference_value(env, stream->on_put, callback);
+  assert(err == 0);
+
+  js_call_function(env, callback, added_bytes, total_bytes);
+  js_close_handle_scope(env, scope);
+}
+
+static js_arraybuffer_t
+bare_sdl_create_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t source_format,
+  int source_channels,
+  int source_freq,
+  uint32_t target_format,
+  int target_channels,
+  int target_freq,
+  std::optional<bare_sdl_audio_stream_get_callback_t> on_get,
+  std::optional<bare_sdl_audio_stream_put_callback_t> on_put
+) {
+  int err;
+
+
+  js_arraybuffer_t handle;
+
+  bare_sdl_audio_stream_t *stream;
+  err = js_create_arraybuffer(env, stream, handle);
+  assert(err == 0);
+
+  *stream = {};
+
+  SDL_AudioSpec source_spec = { (SDL_AudioFormat)source_format, source_channels, source_freq };
+  SDL_AudioSpec target_spec = { (SDL_AudioFormat)target_format, target_channels, target_freq };
+
+  stream->handle = SDL_CreateAudioStream(&source_spec, &target_spec);
+  if (stream->handle == nullptr) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  stream->env = env;
+
+  uv_mutex_init(&stream->mutex);
+
+  uv_loop_t *loop;
+  err = js_get_env_loop(env, &loop);
+  assert(err == 0);
+
+  if (on_get) {
+    err = js_create_reference(env, *on_get, stream->on_get);
+    assert(err == 0);
+
+    err = uv_async_init(loop, &stream->async_get, on_audio_stream_get);
+    assert(err == 0);
+    stream->async_get.data = stream;
+
+    SDL_SetAudioStreamGetCallback(stream->handle, audio_stream_get_callback, stream);
+  }
+
+  if (on_put) {
+    err = js_create_reference(env, *on_put, stream->on_put);
+    assert(err == 0);
+
+    uv_async_init(loop, &stream->async_put, on_audio_stream_put);
+    stream->async_put.data = stream;
+
+    SDL_SetAudioStreamPutCallback(stream->handle, audio_stream_put_callback, stream);
+  }
+
+  return handle;
+}
+
+static void
+bare_sdl__on_audio_stream_close (uv_handle_t *handle) {
+  auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(handle->data);
+
+  if (--stream->pending_closes == 0) {
+    SDL_DestroyAudioStream(stream->handle);
+    uv_mutex_destroy(&stream->mutex);
+  }
+}
+
+static void
+bare_sdl_destroy_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+
+  if (stream->on_get) {
+    SDL_SetAudioStreamGetCallback(stream->handle, nullptr, nullptr);
+    stream->on_get.reset();
+    stream->pending_closes++;
+    uv_close((uv_handle_t*)&stream->async_get, bare_sdl__on_audio_stream_close);
+  }
+
+  if (stream->on_put) {
+    SDL_SetAudioStreamPutCallback(stream->handle, nullptr, nullptr);
+    stream->on_put.reset();
+    stream->pending_closes++;
+    uv_close((uv_handle_t*)&stream->async_put, bare_sdl__on_audio_stream_close);
+  }
+}
+
+static bool
+bare_sdl_put_audio_stream_data(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream,
+  js_arraybuffer_span_t buf,
+  uint32_t buf_offset,
+  int len
+) {
+  bool result = SDL_PutAudioStreamData(stream->handle, &buf[buf_offset], len);
+  return result;
+}
+
+static int
+bare_sdl_get_audio_stream_data(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream,
+  js_arraybuffer_span_t buf,
+  uint32_t buf_offset,
+  int len
+) {
+  int result = SDL_GetAudioStreamData(stream->handle, &buf[buf_offset], len);
+  return result;
+}
+
+static int
+bare_sdl_get_audio_stream_available(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_GetAudioStreamAvailable(stream->handle);
+}
+
+static bool
+bare_sdl_flush_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_FlushAudioStream(stream->handle);
+}
+
+static bool
+bare_sdl_clear_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_ClearAudioStream(stream->handle);
+}
+
+static bool
+bare_sdl_bind_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_BindAudioStream(device_id, stream->handle);
+}
+
+static void
+bare_sdl_unbind_audio_stream(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  SDL_UnbindAudioStream(stream->handle);
+}
+
+static uint32_t
+bare_sdl_get_audio_stream_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_GetAudioStreamDevice(stream->handle);
+}
+
+static bool
+bare_sdl_audio_stream_device_paused(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_AudioStreamDevicePaused(stream->handle);
+}
+
+static bool
+bare_sdl_pause_audio_stream_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_PauseAudioStreamDevice(stream->handle);
+}
+
+static bool
+bare_sdl_resume_audio_stream_device(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_audio_stream_t, 1> stream
+) {
+  return SDL_ResumeAudioStreamDevice(stream->handle);
 }
 
 static uint32_t
@@ -1000,6 +1309,19 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("isAudioDevicePhysical", bare_sdl_is_audio_device_physical)
   V("isAudioDevicePlayback", bare_sdl_is_audio_device_playback)
   V("isAudioDevicePaused", bare_sdl_is_audio_device_paused)
+  V("bindAudioStream", bare_sdl_bind_audio_stream)
+  V("unbindAudioStream", bare_sdl_unbind_audio_stream)
+  V("createAudioStream", bare_sdl_create_audio_stream)
+  V("destroyAudioStream", bare_sdl_destroy_audio_stream)
+  V("putAudioStreamData", bare_sdl_put_audio_stream_data)
+  V("getAudioStreamData", bare_sdl_get_audio_stream_data)
+  V("clearAudioStream", bare_sdl_clear_audio_stream)
+  V("flushAudioStream", bare_sdl_flush_audio_stream)
+  V("getAudioStreamAvailable", bare_sdl_get_audio_stream_available)
+  V("getAudioStreamDevice", bare_sdl_get_audio_stream_device)
+  V("isAudioStreamDevicePaused", bare_sdl_audio_stream_device_paused)
+  V("pauseAudioStreamDevice", bare_sdl_pause_audio_stream_device)
+  V("resumeAudioStreamDevice", bare_sdl_resume_audio_stream_device)
 #undef V
 
   return exports;
