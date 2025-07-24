@@ -10,7 +10,7 @@ async function main() {
   }
 
   console.log('\n# Playback devices:\n')
-  for (const device of recording) {
+  for (const device of playback) {
     printDevice(device)
   }
 }
