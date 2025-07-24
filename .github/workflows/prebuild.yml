@@ -31,6 +31,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - uses: ./.github/actions/virtual-audio-device
+        with:
+          platform: ${{ matrix.platform }}
+          arch: ${{ matrix.arch }}
+      - run: |
+          choco install vb-cable -y
+          choco upgrade llvm
+        if: ${{ matrix.platform == 'win32' }}
+      - shell: pwsh
+        if: ${{ matrix.platform == 'win32' }}
+        run: |
+          New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\' -Force
+          New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\' -Name 'LetAppsAccessMicrophone' -Value 1 -PropertyType DWord
       - run: |
           sudo apt update
           sudo apt install -y \
@@ -41,8 +54,19 @@ jobs:
             libxi-dev \
             libxfixes-dev \
             libwayland-dev \
-            xvfb
+            xvfb \
+            libpulse-dev \
+            pulseaudio
         if: ${{ matrix.platform == 'linux' }}
+      - run: pulseaudio -D --start --exit-idle-time=-1
+        if: ${{ matrix.platform == 'linux' }}
+      - run: |
+          brew install switchaudio-osx blackhole-2ch
+          sudo pkill coreaudiod || true
+          sleep 10
+          SwitchAudioSource -s 'BlackHole 2ch' -t input
+          SwitchAudioSource -s 'BlackHole 2ch' -t output
+        if: ${{ matrix.platform == 'darwin' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }}
