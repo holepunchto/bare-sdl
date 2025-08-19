@@ -1,4 +1,8 @@
 const test = require('brittle')
+<<<<<<< HEAD
+=======
+const { isLinux } = require('which-runtime')
+>>>>>>> fc7408d (camera enumeration and capture)
 const sdl = require('..')
 
 test('sdl.Camera - getCameras', (t) => {
@@ -8,7 +12,11 @@ test('sdl.Camera - getCameras', (t) => {
 
 test('sdl.Camera - getCameraName', (t) => {
   const cameras = sdl.Camera.getCameras()
+<<<<<<< HEAD
   const name = sdl.Camera.getCameraName(cameras[0].id)
+=======
+  const name = sdl.Camera.getCameraName(cameras[0])
+>>>>>>> fc7408d (camera enumeration and capture)
   t.ok(typeof name === 'string' || name === null, 'returns a string or null')
 })
 
@@ -41,7 +49,11 @@ test('sdl.Camera - getSupportedFormats', (t) => {
 
 test('sdl.Camera - open without spec', (t) => {
   const cameras = sdl.Camera.getCameras()
+<<<<<<< HEAD
   using camera = new sdl.Camera(cameras[0].id)
+=======
+  using camera = new sdl.Camera(cameras[0])
+>>>>>>> fc7408d (camera enumeration and capture)
   t.ok(camera._handle, 'camera handle exists')
   t.ok(typeof camera.id === 'number', 'camera id is a number')
 })
@@ -50,13 +62,21 @@ test('sdl.Camera - open with spec', (t) => {
   const cameras = sdl.Camera.getCameras()
   const formats = sdl.Camera.getSupportedFormats(cameras[0])
   const spec = formats[0]
+<<<<<<< HEAD
   using camera = new sdl.Camera(cameras[0].id, spec)
+=======
+  using camera = new sdl.Camera(cameras[0], spec)
+>>>>>>> fc7408d (camera enumeration and capture)
   t.ok(camera._handle, 'camera handle exists')
 })
 
 test('sdl.Camera - permission state', (t) => {
   const cameras = sdl.Camera.getCameras()
+<<<<<<< HEAD
   using camera = new sdl.Camera(cameras[0].id)
+=======
+  using camera = new sdl.Camera(cameras[0])
+>>>>>>> fc7408d (camera enumeration and capture)
   t.ok(typeof camera.permissionState === 'number', 'permission state is number')
   t.ok(typeof camera.isApproved === 'boolean', 'isApproved is boolean')
   t.ok(typeof camera.isPending === 'boolean', 'isPending is boolean')
@@ -64,7 +84,11 @@ test('sdl.Camera - permission state', (t) => {
 
 test('sdl.Camera - format', (t) => {
   const cameras = sdl.Camera.getCameras()
+<<<<<<< HEAD
   using camera = new sdl.Camera(cameras[0].id)
+=======
+  using camera = new sdl.Camera(cameras[0])
+>>>>>>> fc7408d (camera enumeration and capture)
   const format = camera.format
   t.ok(format instanceof sdl.Camera.CameraSpec, 'returns CameraSpec instance')
   t.ok(typeof format.width === 'number', 'width is number')
@@ -73,7 +97,11 @@ test('sdl.Camera - format', (t) => {
 
 test('sdl.Camera - acquire frame', (t) => {
   const cameras = sdl.Camera.getCameras()
+<<<<<<< HEAD
   using camera = new sdl.Camera(cameras[0].id)
+=======
+  using camera = new sdl.Camera(cameras[0])
+>>>>>>> fc7408d (camera enumeration and capture)
   using frame = camera.acquireFrame()
 
   t.ok(frame instanceof sdl.Camera.CameraFrame, 'returns CameraFrame instance')
