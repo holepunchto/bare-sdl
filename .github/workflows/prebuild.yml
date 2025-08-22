@@ -63,7 +63,7 @@ jobs:
       - run: |
           sudo apt update
           sudo apt install -y \
-            libpulse-dev
+            libpulse-dev \
             libwayland-dev \
             libx11-dev \
             libxcursor-dev \
