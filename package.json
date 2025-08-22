@@ -1,6 +1,6 @@
 {
   "name": "bare-sdl",
-  "version": "1.0.0-3",
+  "version": "1.0.0-4",
   "description": "Bare binding for SDL",
   "exports": {
     ".": "./index.js",
