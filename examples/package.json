@@ -4,7 +4,7 @@
   "author": "Holepunch",
   "license": "Apache-2.0",
   "dependencies": {
-    "bare-ffmpeg": "1.0.0-14",
+    "bare-ffmpeg": "^1.0.0-21",
     "bare-sdl": "file:.."
   }
 }
