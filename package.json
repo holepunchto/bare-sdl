@@ -32,6 +32,7 @@
     "bare": ">=1.14.0"
   },
   "devDependencies": {
+    "bare-env": "^3.0.0",
     "brittle": "^3.1.1",
     "cmake-bare": "^1.1.6",
     "cmake-fetch": "^1.4.6",

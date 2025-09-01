@@ -1,10 +1,16 @@
 const test = require('brittle')
+const env = require('bare-env')
 const sdl = require('..')
 
 test('sdl.Camera - getCameras', (t) => {
   const cameras = sdl.Camera.getCameras()
   t.ok(Array.isArray(cameras), 'returns an array')
 })
+
+if (env.CI) {
+  // Devices are not available in ci
+  Bare.exit()
+}
 
 test('sdl.Camera - getCameraName', (t) => {
   using camera = sdl.Camera.defaultCamera()
