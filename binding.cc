@@ -899,14 +899,14 @@ bare_sdl_get_camera_frame_pixels(
 
   int err;
 
-  size_t pixel_size = static_cast<size_t>(frame->surface->pitch * frame->surface->h);
+  size_t pixel_size = static_cast<size_t>(frame->surface->pitch) * static_cast<size_t>(frame->surface->h);
 
   js_arraybuffer_t handle;
   uint8_t *data;
   err = js_create_arraybuffer(env, pixel_size, data, handle);
   assert(err == 0);
 
-  std::memcpy(data, frame->surface->pixels, pixel_size);
+  memcpy(data, frame->surface->pixels, pixel_size);
 
   return handle;
 }
