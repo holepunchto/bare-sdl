@@ -539,18 +539,17 @@ bare_sdl_get_cameras(
   js_env_t *env,
   js_receiver_t
 ) {
-  int count = 0;
-  SDL_CameraID *devices = SDL_GetCameras(&count);
-
   std::vector<uint32_t> list;
-
-  if (devices != nullptr) {
-    for (int i = 0; i < count; i++) {
-      list.push_back(devices[i]);
-    }
-    SDL_free(devices);
+  SDL_CameraID *devices = SDL_GetCameras(&count);
+  
+  if (devices == nullptr) return list;
+  
+  int count = 0;
+  for (int i = 0; i < count; i++) {
+    list.push_back(devices[i]);
   }
-
+  SDL_free(devices);
+ 
   return list;
 }
 
