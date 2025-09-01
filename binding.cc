@@ -388,8 +388,6 @@ bare_sdl_create_audio_stream(
   std::optional<bare_sdl_audio_stream_put_callback_t> on_put
 ) {
   int err;
-
-
   js_arraybuffer_t handle;
 
   bare_sdl_audio_stream_t *stream;
