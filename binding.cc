@@ -40,9 +40,15 @@ typedef struct {
   SDL_Camera *handle;
 } bare_sdl_camera_t;
 
+enum bare_camera_format_status : uint8_t {
+  BARE_CAMERA_FORMAT_OK = 0,
+  BARE_CAMERA_FORMAT_PENDING = 1,
+  BARE_CAMERA_FORMAT_ERROR = 2
+};
+
 typedef struct {
   SDL_CameraSpec spec;
-  bool valid;
+  bare_camera_format_status status;
 } bare_sdl_camera_spec_t;
 
 typedef struct {
@@ -757,14 +763,28 @@ bare_sdl_get_camera_format(
   int err;
 
   js_arraybuffer_t handle;
-
   bare_sdl_camera_spec_t *spec;
   err = js_create_arraybuffer(env, spec, handle);
   assert(err == 0);
 
-  spec->valid = SDL_GetCameraFormat(cam->handle, &spec->spec);
+  if (SDL_GetCameraFormat(cam->handle, &spec->spec)) {
+    spec->status = BARE_CAMERA_FORMAT_OK;
+    return handle;
+  }
+
+  const int state = SDL_GetCameraPermissionState(cam->handle);
+  spec->status = (state == 0) ? BARE_CAMERA_FORMAT_PENDING : BARE_CAMERA_FORMAT_ERROR;
 
   return handle;
+}
+
+static int
+bare_sdl_get_camera_spec_status(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->status;
 }
 
 static bool
@@ -773,7 +793,7 @@ bare_sdl_get_camera_spec_valid(
   js_receiver_t,
   js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
 ) {
-  return spec->valid;
+  return spec->status == BARE_CAMERA_FORMAT_OK;
 }
 
 static uint32_t
@@ -1397,6 +1417,10 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V(SDL_CAMERA_POSITION_UNKNOWN)
   V(SDL_CAMERA_POSITION_FRONT_FACING)
   V(SDL_CAMERA_POSITION_BACK_FACING)
+
+  V(BARE_CAMERA_FORMAT_OK)
+  V(BARE_CAMERA_FORMAT_PENDING)
+  V(BARE_CAMERA_FORMAT_ERROR)
 #undef V
 
 #define V(name, function) \
@@ -1459,6 +1483,7 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("getCameraProperties", bare_sdl_get_camera_properties)
   V("getCameraFormat", bare_sdl_get_camera_format)
   V("getCameraSpecValid", bare_sdl_get_camera_spec_valid)
+  V("getCameraSpecStatus", bare_sdl_get_camera_spec_status)
   V("getCameraSpecFormat", bare_sdl_get_camera_spec_format)
   V("getCameraSpecColorspace", bare_sdl_get_camera_spec_colorspace)
   V("getCameraSpecWidth", bare_sdl_get_camera_spec_width)

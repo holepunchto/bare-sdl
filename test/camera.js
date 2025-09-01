@@ -66,11 +66,16 @@ test('sdl.Camera - permission state', (t) => {
   t.ok(typeof camera.isPending === 'boolean', 'isPending is boolean')
 })
 
+test('sdl.Camera - spec format status', (t) => {
+  using camera = sdl.Camera.defaultCamera()
+  t.ok(camera.spec.status)
+})
+
 test('sdl.Camera - format', (t) => {
   using camera = sdl.Camera.defaultCamera()
   t.ok(
-    camera.format instanceof sdl.Camera.CameraSpec,
-    'returns CameraSpec instance'
+    camera.format instanceof sdl.Camera.CameraFormat,
+    'returns CameraFormat instance'
   )
   t.ok(typeof camera.format.width === 'number', 'width is number')
   t.ok(typeof camera.format.height === 'number', 'height is number')
@@ -162,8 +167,7 @@ test('sdl.Camera - memory cleanup with multiple open/close', (t) => {
     using camera = new sdl.Camera(deviceId)
     t.ok(camera._handle, `cycle ${i}: camera opened`)
 
-    const format = camera.format
-    t.ok(format.valid, `cycle ${i}: format check successful`)
+    t.ok(camera.spec.valid, `cycle ${i}: format check successful`)
 
     camera.destroy()
     t.ok(!camera._handle, `cycle ${i}: camera handle cleared after destroy`)
