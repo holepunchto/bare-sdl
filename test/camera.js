@@ -7,20 +7,20 @@ test('sdl.Camera - getCameras', (t) => {
 })
 
 test('sdl.Camera - getCameraName', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  const name = sdl.Camera.getCameraName(cameras[0].id)
+  using camera = sdl.Camera.defaultCamera()
+  const name = sdl.Camera.getCameraName(camera.id)
   t.ok(typeof name === 'string' || name === null, 'returns a string or null')
 })
 
 test('sdl.Camera - getCameraPosition', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  const position = sdl.Camera.getCameraPosition(cameras[0])
+  using camera = sdl.Camera.defaultCamera()
+  const position = sdl.Camera.getCameraPosition(camera.id)
   t.ok(typeof position === 'number', 'returns a number')
 })
 
 test('sdl.Camera - getSupportedFormats', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  const formats = sdl.Camera.getSupportedFormats(cameras[0])
+  using camera = sdl.Camera.defaultCamera()
+  const formats = sdl.Camera.getSupportedFormats(camera.id)
   t.ok(Array.isArray(formats), 'returns an array')
 
   if (formats.length > 0) {
@@ -40,40 +40,38 @@ test('sdl.Camera - getSupportedFormats', (t) => {
 })
 
 test('sdl.Camera - open without spec', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  using camera = new sdl.Camera(cameras[0].id)
+  using camera = sdl.Camera.defaultCamera()
   t.ok(camera._handle, 'camera handle exists')
   t.ok(typeof camera.id === 'number', 'camera id is a number')
 })
 
 test('sdl.Camera - open with spec', (t) => {
   const cameras = sdl.Camera.getCameras()
-  const formats = sdl.Camera.getSupportedFormats(cameras[0])
+  const formats = sdl.Camera.getSupportedFormats(cameras[0].id)
   const spec = formats[0]
-  using camera = new sdl.Camera(cameras[0].id, spec)
+  using camera = sdl.Camera.defaultCamera(spec)
   t.ok(camera._handle, 'camera handle exists')
 })
 
 test('sdl.Camera - permission state', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  using camera = new sdl.Camera(cameras[0].id)
+  using camera = sdl.Camera.defaultCamera()
   t.ok(typeof camera.permissionState === 'number', 'permission state is number')
   t.ok(typeof camera.isApproved === 'boolean', 'isApproved is boolean')
   t.ok(typeof camera.isPending === 'boolean', 'isPending is boolean')
 })
 
 test('sdl.Camera - format', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  using camera = new sdl.Camera(cameras[0].id)
-  const format = camera.format
-  t.ok(format instanceof sdl.Camera.CameraSpec, 'returns CameraSpec instance')
-  t.ok(typeof format.width === 'number', 'width is number')
-  t.ok(typeof format.height === 'number', 'height is number')
+  using camera = sdl.Camera.defaultCamera()
+  t.ok(
+    camera.format instanceof sdl.Camera.CameraSpec,
+    'returns CameraSpec instance'
+  )
+  t.ok(typeof camera.format.width === 'number', 'width is number')
+  t.ok(typeof camera.format.height === 'number', 'height is number')
 })
 
 test('sdl.Camera - acquire frame', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  using camera = new sdl.Camera(cameras[0].id)
+  using camera = sdl.Camera.defaultCamera()
   using frame = camera.acquireFrame()
 
   t.ok(frame instanceof sdl.Camera.CameraFrame, 'returns CameraFrame instance')
@@ -93,8 +91,8 @@ test('sdl.Camera - acquire frame', (t) => {
 })
 
 test('SDLCameraFormat', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  const formats = sdl.Camera.getSupportedFormats(cameras[0].id)
+  using camera = sdl.Camera.defaultCamera()
+  const formats = sdl.Camera.getSupportedFormats(camera.id)
   const format = formats[0]
   t.ok(format, 'format exists')
   t.ok(typeof format.width === 'number', 'width is number')
@@ -103,8 +101,7 @@ test('SDLCameraFormat', (t) => {
 })
 
 test('sdl.Camera - stress test frame acquisition', (t) => {
-  const cameras = sdl.Camera.getCameras()
-  using camera = new sdl.Camera(cameras[0])
+  using camera = sdl.Camera.defaultCamera()
 
   const frameCount = 50
   for (let i = 0; i < frameCount; i++) {
@@ -128,18 +125,24 @@ test('sdl.Camera - incorrect device ID handling', (t) => {
     'incorrect id returns unknown position'
   )
 
-  const formats = sdl.Camera.getSupportedFormats(incorrectId)
-  t.ok(
-    Array.isArray(formats) && formats.length === 0,
-    'invalid device returns empty formats array'
-  )
-
   t.exception(
     () => {
       using camera = new sdl.Camera(incorrectId)
     },
     /Error/,
     'opening camera with incorrect id should throw'
+  )
+})
+
+test('sdl.Camera - incorrect device ID handling', (t) => {
+  const incorrectId = 0xffffffff
+
+  t.exception(
+    () => {
+      const formats = sdl.Camera.getSupportedFormats(incorrectId)
+    },
+    /Error/,
+    'invalid device id should throw'
   )
 })
 
@@ -150,7 +153,7 @@ test('sdl.Camera - memory cleanup with multiple open/close', (t) => {
   const deviceId = cameras[0]
 
   for (let i = 0; i < cycles; i++) {
-    const camera = new sdl.Camera(deviceId)
+    using camera = new sdl.Camera(deviceId)
     t.ok(camera._handle, `cycle ${i}: camera opened`)
 
     const format = camera.format
