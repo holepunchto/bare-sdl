@@ -669,14 +669,6 @@ bare_sdl_open_camera(
   std::optional<int> framerate_numerator,
   std::optional<int> framerate_denominator
 ) {
-  int err;
-
-  js_arraybuffer_t handle;
-
-  bare_sdl_camera_t *cam;
-  err = js_create_arraybuffer(env, cam, handle);
-  assert(err == 0);
-
   SDL_CameraSpec spec;
   SDL_CameraSpec *spec_ptr = nullptr;
 
@@ -689,9 +681,14 @@ bare_sdl_open_camera(
     spec.framerate_denominator = framerate_denominator.value_or(1);
     spec_ptr = &spec;
   }
+  
+  int err;
+  js_arraybuffer_t handle;
+  bare_sdl_camera_t *cam;
+  err = js_create_arraybuffer(env, cam, handle);
+  assert(err == 0);
 
   cam->handle = SDL_OpenCamera((SDL_CameraID)device_id, spec_ptr);
-
   if (cam->handle == nullptr) {
     err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
