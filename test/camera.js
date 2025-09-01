@@ -125,7 +125,7 @@ test('sdl.Camera - incorrect device ID handling', (t) => {
 
   t.ok(
     position === sdl.constants.SDL_CAMERA_POSITION_UNKNOWN,
-    'incorrect id  returns unknown position'
+    'incorrect id returns unknown position'
   )
 
   const formats = sdl.Camera.getSupportedFormats(incorrectId)
