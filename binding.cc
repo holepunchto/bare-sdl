@@ -303,8 +303,6 @@ audio_stream_get_callback(void *userdata, SDL_AudioStream *sdl_stream, int neede
   uv_loop_t *loop;
   int err = js_get_env_loop(stream->env, &loop);
   assert(err == 0);
-
-
   uv_mutex_lock(&stream->mutex);
   stream->get_needed_bytes = needed_bytes;
   stream->get_total_bytes = total_bytes;
