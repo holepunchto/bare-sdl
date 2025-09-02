@@ -1,9 +1,9 @@
-#include "SDL3/SDL_camera.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
+#include "SDL3/SDL_camera.h"
 
 typedef struct {
   SDL_Window *handle;
@@ -554,7 +554,7 @@ bare_sdl_get_cameras(
 
     throw js_pending_exception;
   }
- 
+
   std::vector<uint32_t> list;
   for (int i = 0; i < count; i++) {
     list.push_back(devices[i]);
@@ -600,7 +600,7 @@ bare_sdl_get_camera_supported_formats(
 
     throw js_pending_exception;
   }
- 
+
   std::vector<js_arraybuffer_t> list;
   for (int i = 0; i < count; i++) {
     js_arraybuffer_t handle;
