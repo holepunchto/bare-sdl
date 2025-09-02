@@ -394,8 +394,6 @@ bare_sdl_create_audio_stream(
   err = js_create_arraybuffer(env, stream, handle);
   assert(err == 0);
 
-  *stream = {};
-
   SDL_AudioSpec source_spec = { static_cast<SDL_AudioFormat>(source_format), source_channels, source_freq };
   SDL_AudioSpec target_spec = { static_cast<SDL_AudioFormat>(target_format), target_channels, target_freq };
 
