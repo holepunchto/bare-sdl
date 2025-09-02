@@ -547,16 +547,15 @@ bare_sdl_get_cameras(
   int err;
 
   int count = 0;
-  std::vector<uint32_t> list;
   SDL_CameraID *devices = SDL_GetCameras(&count);
-
   if (devices == nullptr) {
     err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
   }
-
+ 
+  std::vector<uint32_t> list;
   for (int i = 0; i < count; i++) {
     list.push_back(devices[i]);
   }
