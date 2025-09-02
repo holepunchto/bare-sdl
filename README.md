@@ -430,6 +430,20 @@ Parameters:
 
 **Returns**: A new `AudioStream` instance
 
+Example:
+
+```js
+const mic = sdl.AudioDevice.defaultRecordingDevice()
+
+const targetSpec = {
+  format: sdl.constants.SDL_AUDIO_F32,
+  channels: mic.spec.channels,
+  freq: mic.spec.freq
+}
+
+const audioStream = new sdl.AudioStream(mic.spec, targetSpec)
+```
+
 #### Methods
 
 ##### `AudioStream.put(buffer[, offset[, length]])`

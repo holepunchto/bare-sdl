@@ -396,8 +396,8 @@ bare_sdl_create_audio_stream(
 
   *stream = {};
 
-  SDL_AudioSpec source_spec = { (SDL_AudioFormat)source_format, source_channels, source_freq };
-  SDL_AudioSpec target_spec = { (SDL_AudioFormat)target_format, target_channels, target_freq };
+  SDL_AudioSpec source_spec = { static_cast<SDL_AudioFormat>(source_format), source_channels, source_freq };
+  SDL_AudioSpec target_spec = { static_cast<SDL_AudioFormat>(target_format), target_channels, target_freq };
 
   stream->handle = SDL_CreateAudioStream(&source_spec, &target_spec);
   if (stream->handle == nullptr) {
@@ -460,14 +460,14 @@ bare_sdl_destroy_audio_stream(
     SDL_SetAudioStreamGetCallback(stream->handle, nullptr, nullptr);
     stream->on_get.reset();
     stream->pending_closes++;
-    uv_close((uv_handle_t*)&stream->async_get, bare_sdl__on_audio_stream_close);
+    uv_close(reinterpret_cast<uv_handle_t*>(&stream->async_get), bare_sdl__on_audio_stream_close);
   }
 
   if (stream->on_put) {
     SDL_SetAudioStreamPutCallback(stream->handle, nullptr, nullptr);
     stream->on_put.reset();
     stream->pending_closes++;
-    uv_close((uv_handle_t*)&stream->async_put, bare_sdl__on_audio_stream_close);
+    uv_close(reinterpret_cast<uv_handle_t*>(&stream->async_put), bare_sdl__on_audio_stream_close);
   }
 }
 
