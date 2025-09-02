@@ -593,16 +593,15 @@ bare_sdl_get_camera_supported_formats(
   int err;
 
   int count = 0;
-  std::vector<js_arraybuffer_t> list;
   SDL_CameraSpec **specs = SDL_GetCameraSupportedFormats(device_id, &count);
-
   if (specs == nullptr) {
     err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
     throw js_pending_exception;
   }
-
+ 
+  std::vector<js_arraybuffer_t> list;
   for (int i = 0; i < count; i++) {
     js_arraybuffer_t handle;
     bare_sdl_camera_format_t *format;
