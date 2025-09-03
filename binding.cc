@@ -1,9 +1,9 @@
-#include "SDL3/SDL_audio.h"
 #include <bare.h>
 #include <js.h>
 #include <jstl.h>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
 
 using bare_sdl_audio_stream_get_callback_t = js_function_t<void, int, int>;
 using bare_sdl_audio_stream_put_callback_t = js_function_t<void, int, int>;
@@ -300,9 +300,7 @@ static void on_audio_stream_get(uv_async_t *handle);
 static void
 audio_stream_get_callback(void *userdata, SDL_AudioStream *sdl_stream, int needed_bytes, int total_bytes) {
   auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(userdata);
-  uv_loop_t *loop;
-  int err = js_get_env_loop(stream->env, &loop);
-  assert(err == 0);
+
   uv_mutex_lock(&stream->mutex);
   stream->get_needed_bytes = needed_bytes;
   stream->get_total_bytes = total_bytes;
