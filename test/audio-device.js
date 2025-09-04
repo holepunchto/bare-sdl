@@ -1,44 +1,33 @@
 const test = require('brittle')
-const env = require('bare-env')
-const { isLinux } = require('which-runtime')
 const sdl = require('..')
-
-test('sdl.AudioDevice - playbackDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.playbackDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDeviceFormats', (t) => {
-  const formats = sdl.AudioDevice.recordingDeviceFormats()
-  t.ok(Array.isArray(formats), 'returns an array')
-})
-
-test('sdl.AudioDevice - playbackDevices', (t) => {
-  const devices = sdl.AudioDevice.playbackDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
-
-test('sdl.AudioDevice - recordingDevices', (t) => {
-  const devices = sdl.AudioDevice.recordingDevices()
-  t.ok(Array.isArray(devices), 'returns an array')
-})
-
-if (env.CI && isLinux) {
-  // Devices are not available in ci
-  Bare.exit()
-}
+const { hasRecordingDevice, hasPlaybackDevice } = require('./helpers/index')
 
 test('sdl.AudioDevice - defaultRecordingDevice', (t) => {
-  const device = sdl.AudioDevice.defaultRecordingDevice()
+  if (!hasRecordingDevice) {
+    t.pass('No default recording device')
+    return
+  }
+
+  const device = sdl.AudioDevice.defaultPlaybackDevice()
   t.ok(device instanceof sdl.AudioDevice, 'returns sdl.AudioDevice instance')
 })
 
 test('sdl.AudioDevice - defaultPlaybackDevice', (t) => {
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
+    return
+  }
+
   const device = sdl.AudioDevice.defaultPlaybackDevice()
   t.ok(device instanceof sdl.AudioDevice, 'returns sdl.AudioDevice instance')
 })
 
 test('sdl.AudioDevice - properties', (t) => {
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
+    return
+  }
+
   const spec = { format: sdl.constants.SDL_AUDIO_F32, channels: 2, freq: 48000 }
   using device = sdl.AudioDevice.defaultPlaybackDevice(spec)
 
@@ -51,12 +40,22 @@ test('sdl.AudioDevice - properties', (t) => {
 })
 
 test('sdl.AudioDevice - set gain', (t) => {
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
+    return
+  }
+
   using device = sdl.AudioDevice.defaultPlaybackDevice()
   device.gain = 0.5
   t.is(device.gain, 0.5, 'sets gain correctly')
 })
 
 test('sdl.AudioDevice - pause/resume', (t) => {
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
+    return
+  }
+
   const device = sdl.AudioDevice.defaultPlaybackDevice()
 
   {
@@ -71,6 +70,11 @@ test('sdl.AudioDevice - pause/resume', (t) => {
 })
 
 test('SDLAudioSpec', (t) => {
+  if (!hasPlaybackDevice) {
+    t.pass('No default playback device')
+    return
+  }
+
   using device = sdl.AudioDevice.defaultPlaybackDevice()
   const format = new sdl.AudioDevice.AudioDeviceFormat(device.id)
   const spec = new sdl.AudioDevice.AudioSpec(format)

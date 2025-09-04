@@ -17,7 +17,7 @@ jobs:
           - os: macos-latest
             platform: darwin
             arch: arm64
-          - os: windows-latest
+          - os: windows-2022
             platform: win32
             arch: x64
     runs-on: ${{ matrix.os }}
@@ -31,37 +31,21 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
       - run: |
-          choco install vb-cable -y
-          choco upgrade llvm
-        if: ${{ matrix.platform == 'win32' }}
-      - shell: pwsh
-        if: ${{ matrix.platform == 'win32' }}
-        run: |
-          New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\' -Force
-          New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\' -Name 'LetAppsAccessMicrophone' -Value 1 -PropertyType DWord
-      - run: |
           sudo apt update
           sudo apt install -y \
-            libx11-dev \
-            libxext-dev \
-            libxrandr-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxfixes-dev \
-            libwayland-dev \
-            xvfb \
             libpulse-dev \
-            pulseaudio
+            libwayland-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxfixes-dev \
+            libxi-dev \
+            libxrandr-dev \
+            pulseaudio \
+            xvfb
         if: ${{ matrix.platform == 'linux' }}
-      - run: pulseaudio -D --start --exit-idle-time=-1
-        if: ${{ matrix.platform == 'linux' }}
-      - run: |
-          brew install switchaudio-osx blackhole-2ch
-          sudo pkill coreaudiod || true
-          sleep 10
-          SwitchAudioSource -s 'BlackHole 2ch' -t input
-          SwitchAudioSource -s 'BlackHole 2ch' -t output
-        if: ${{ matrix.platform == 'darwin' }}
+      - run: choco install vb-cable -y
+        if: ${{ matrix.platform == 'win32' }}
       - run: npm install -g bare-runtime bare-make
       - run: npm install
       - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}

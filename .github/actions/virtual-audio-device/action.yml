@@ -1,11 +1,11 @@
-name: 'virtual-audio-device'
-description: 'set up virtual audio devices for win32, linux, darwin'
+name: virtual-audio-device
+description: Set up virtual audio devices for Windows, Linux, or macOS
 inputs:
   platform:
-    description: 'Target platform'
+    description: Target platform
     required: true
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - run: '${{ github.action_path }}/linux/setup_sound.sh'
       shell: bash -e {0}

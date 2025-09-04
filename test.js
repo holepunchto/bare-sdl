@@ -1,5 +1,6 @@
 require('./test/audio-device')
 require('./test/camera')
+require('./test/audio-stream')
 require('./test/event')
 require('./test/poller')
 require('./test/renderer')

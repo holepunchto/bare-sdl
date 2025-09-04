@@ -1,7 +1,7 @@
 param (
-  [string]$Url = 'https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack45.zip',
-  [string]$ZipName = 'vbcable.zip',
-  [string]$ExtractDir = 'vbcable'
+  [string]$Url = "https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack45.zip",
+  [string]$ZipName = "vbcable.zip",
+  [string]$ExtractDir = "vbcable"
 )
 
 function Download-Zip {
@@ -29,7 +29,7 @@ function Trust-Cert {
 function Install-Driver {
   param($InfDir)
   Write-Host "Installing driver(s) from $InfDir"
-  Get-ChildItem -Path $InfDir -Filter 'vbMmeCable64_win*.inf' -Recurse |
+  Get-ChildItem -Path $InfDir -Filter "vbMmeCable64_win*.inf" -Recurse |
     ForEach-Object {
       $inf = $_.FullName
       Write-Host "  devcon.exe install `"$inf`" VBAudioVACWDM"
@@ -39,7 +39,7 @@ function Install-Driver {
 
 function Restart-AudioServices {
   Write-Host "Restarting Audio services to pick up new device"
-  foreach ($svc in 'AudioSrv','AudioEndpointBuilder') {
+  foreach ($svc in "AudioSrv","AudioEndpointBuilder") {
     if (Get-Service $svc -ErrorAction SilentlyContinue) {
       Restart-Service -Name $svc -Force
     }
@@ -58,16 +58,21 @@ Push-Location $PSScriptRoot
 Download-Zip -Url $Url -Out (Join-Path $PSScriptRoot $ZipName)
 Expand-Zip -Zip (Join-Path $PSScriptRoot $ZipName) -Dest (Join-Path $PSScriptRoot $ExtractDir)
 
-$cer = Join-Path $PSScriptRoot 'vbcable.cer'
+$cer = Join-Path $PSScriptRoot "vbcable.cer"
+
 if (Test-Path $cer) {
   Write-Host "Adding certificate to TrustedPublisher: $cer"
   certutil.exe -addstore -f TrustedPublisher $cer
 } else {
   Write-Error "Certificate not found at $cer; cannot trust the driver."
 }
+
 Install-Driver -InfDir (Join-Path $PSScriptRoot $ExtractDir)
 
 Restart-AudioServices
 Dump-Devices
 
 Pop-Location
+
+New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\" -Force
+New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy\" -Name "LetAppsAccessMicrophone" -Value 1 -PropertyType DWord
