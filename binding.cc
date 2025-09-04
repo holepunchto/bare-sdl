@@ -74,6 +74,7 @@ typedef struct {
 
 typedef struct {
   SDL_CameraSpec spec;
+  bare_camera_format_status status;
 } bare_sdl_camera_format_t;
 
 typedef struct {
@@ -1063,7 +1064,7 @@ bare_sdl_get_camera_format(
   int err;
 
   js_arraybuffer_t handle;
-  bare_sdl_camera_spec_t *spec;
+  bare_sdl_camera_format_t *spec;
   err = js_create_arraybuffer(env, spec, handle);
   assert(err == 0);
 
