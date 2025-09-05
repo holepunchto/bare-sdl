@@ -484,15 +484,9 @@ Indicates if camera access is pending.
 
 ##### `Camera.spec`
 
-Gets the current camera specification and status.
+Gets the current camera specification.
 
 **Returns**: `Camera.CameraSpec` instance
-
-##### `Camera.format`
-
-Gets the active camera format.
-
-**Returns**: `Camera.CameraFormat` instance
 
 #### Methods
 
@@ -556,79 +550,15 @@ Parameters:
 
 **Returns**: `Camera` - The default camera
 
-### `Camera.CameraFormat`
-
-Represents an active camera format. Typically accessed only via existing `Camera` instance.
-
-```js
-const format = camera.format
-```
-
-#### Properties
-
-##### `CameraFormat.format`
-
-Gets the pixel format.
-
-**Returns**: `number`
-
-##### `CameraFormat.colorspace`
-
-Gets the colorspace.
-
-**Returns**: `number`
-
-##### `CameraFormat.width`
-
-Gets the frame width in pixels.
-
-**Returns**: `number`
-
-##### `CameraFormat.height`
-
-Gets the frame height in pixels.
-
-**Returns**: `number`
-
-##### `CameraFormat.framerateNumerator`
-
-Gets the framerate numerator.
-
-**Returns**: `number`
-
-##### `CameraFormat.framerateDenominator`
-
-Gets the framerate denominator.
-
-**Returns**: `number`
-
-##### `CameraFormat.fps`
-
-Gets the frames per second.
-
-**Returns**: `number`
-
 ### `Camera.CameraSpec`
 
-Represents the camera specification and its selection status. Typically accessed only via existing `Camera` instance.
+Represents the current camera format selection. Typically accessed only via an existing `Camera` instance.
 
 ```js
 const spec = camera.spec
 ```
 
 #### Properties
-
-##### `CameraSpec.status`
-
-Gets the selection status: `'ok'`, `'pending'`, or `'error'`.
-
-**Returns**: `string`
-
-##### `CameraSpec.valid`
-
-Indicates if the spec is valid.
-
-**Returns**: `boolean`
 
 ##### `CameraSpec.format`
 

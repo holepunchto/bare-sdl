@@ -61,21 +61,10 @@ typedef struct {
   SDL_Camera *handle;
 } bare_sdl_camera_t;
 
-enum bare_camera_format_status : uint8_t {
-  BARE_CAMERA_FORMAT_OK = 0,
-  BARE_CAMERA_FORMAT_PENDING = 1,
-  BARE_CAMERA_FORMAT_ERROR = 2
-};
-
 typedef struct {
   SDL_CameraSpec spec;
-  bare_camera_format_status status;
 } bare_sdl_camera_spec_t;
 
-typedef struct {
-  SDL_CameraSpec spec;
-  bare_camera_format_status status;
-} bare_sdl_camera_format_t;
 
 typedef struct {
   SDL_Surface *surface;
@@ -907,11 +896,11 @@ bare_sdl_get_camera_supported_formats(
   std::vector<js_arraybuffer_t> list;
   for (int i = 0; i < count; i++) {
     js_arraybuffer_t handle;
-    bare_sdl_camera_format_t *format;
-    err = js_create_arraybuffer(env, format, handle);
+    bare_sdl_camera_spec_t *spec;
+    err = js_create_arraybuffer(env, spec, handle);
     assert(err == 0);
 
-    format->spec = *specs[i];
+    spec->spec = *specs[i];
     list.push_back(handle);
   }
 
@@ -920,59 +909,6 @@ bare_sdl_get_camera_supported_formats(
   return list;
 }
 
-static uint32_t
-bare_sdl_get_camera_format_format(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.format;
-}
-
-static uint32_t
-bare_sdl_get_camera_format_colorspace(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.colorspace;
-}
-
-static int
-bare_sdl_get_camera_format_width(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.width;
-}
-
-static int
-bare_sdl_get_camera_format_height(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.height;
-}
-
-static int
-bare_sdl_get_camera_format_framerate_numerator(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.framerate_numerator;
-}
-
-static int
-bare_sdl_get_camera_format_framerate_denominator(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_format_t, 1> format
-) {
-  return format->spec.framerate_denominator;
-}
 
 static js_arraybuffer_t
 bare_sdl_open_camera(
@@ -1064,37 +1000,12 @@ bare_sdl_get_camera_format(
   int err;
 
   js_arraybuffer_t handle;
-  bare_sdl_camera_format_t *spec;
+  bare_sdl_camera_spec_t *spec;
   err = js_create_arraybuffer(env, spec, handle);
   assert(err == 0);
 
-  if (SDL_GetCameraFormat(cam->handle, &spec->spec)) {
-    spec->status = BARE_CAMERA_FORMAT_OK;
-    return handle;
-  }
-
-  const int state = SDL_GetCameraPermissionState(cam->handle);
-  spec->status = (state == 0) ? BARE_CAMERA_FORMAT_PENDING : BARE_CAMERA_FORMAT_ERROR;
-
+  SDL_GetCameraFormat(cam->handle, &spec->spec);
   return handle;
-}
-
-static int
-bare_sdl_get_camera_spec_status(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
-) {
-  return spec->status;
-}
-
-static bool
-bare_sdl_get_camera_spec_valid(
-  js_env_t *env,
-  js_receiver_t,
-  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
-) {
-  return spec->status == BARE_CAMERA_FORMAT_OK;
 }
 
 static uint32_t
@@ -1719,9 +1630,6 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V(SDL_CAMERA_POSITION_FRONT_FACING)
   V(SDL_CAMERA_POSITION_BACK_FACING)
 
-  V(BARE_CAMERA_FORMAT_OK)
-  V(BARE_CAMERA_FORMAT_PENDING)
-  V(BARE_CAMERA_FORMAT_ERROR)
 #undef V
 
 #define V(name, function) \
@@ -1771,20 +1679,12 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("getCameraName", bare_sdl_get_camera_name)
   V("getCameraPosition", bare_sdl_get_camera_position)
   V("getCameraSupportedFormats", bare_sdl_get_camera_supported_formats)
-  V("getCameraFormatFormat", bare_sdl_get_camera_format_format)
-  V("getCameraFormatColorspace", bare_sdl_get_camera_format_colorspace)
-  V("getCameraFormatWidth", bare_sdl_get_camera_format_width)
-  V("getCameraFormatHeight", bare_sdl_get_camera_format_height)
-  V("getCameraFormatFramerateNumerator", bare_sdl_get_camera_format_framerate_numerator)
-  V("getCameraFormatFramerateDenominator", bare_sdl_get_camera_format_framerate_denominator)
   V("openCamera", bare_sdl_open_camera)
   V("closeCamera", bare_sdl_close_camera)
   V("getCameraPermissionState", bare_sdl_get_camera_permission_state)
   V("getCameraId", bare_sdl_get_camera_id)
   V("getCameraProperties", bare_sdl_get_camera_properties)
   V("getCameraFormat", bare_sdl_get_camera_format)
-  V("getCameraSpecValid", bare_sdl_get_camera_spec_valid)
-  V("getCameraSpecStatus", bare_sdl_get_camera_spec_status)
   V("getCameraSpecFormat", bare_sdl_get_camera_spec_format)
   V("getCameraSpecColorspace", bare_sdl_get_camera_spec_colorspace)
   V("getCameraSpecWidth", bare_sdl_get_camera_spec_width)

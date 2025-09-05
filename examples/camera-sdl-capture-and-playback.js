@@ -8,28 +8,19 @@ class CameraCapture {
       throw new Error('No cameras found')
     }
 
-    cameras.forEach((id, index) => {
-      const name = sdl.Camera.getCameraName(id)
-      const position = sdl.Camera.getCameraPosition(id)
-      const positionStr =
-        position === sdl.constants.SDL_CAMERA_POSITION_FRONT_FACING
-          ? 'front-facing'
-          : position === sdl.constants.SDL_CAMERA_POSITION_BACK_FACING
-            ? 'back-facing'
-            : 'unknown'
+    for (const camera of cameras) {
+      console.log(`  ${camera.index}: ${camera.name} (${camera.id}))`, camera)
 
-      console.log(`  ${index}: ${name} (${positionStr})`)
-
-      if (index === 0) {
-        const formats = sdl.Camera.getSupportedFormats(id)
+      if (camera.index === 0) {
+        const formats = sdl.Camera.getSupportedFormats(camera.id)
         console.log(`  Supported formats: ${formats.length}`)
 
-        formats.slice(0, 3).forEach((format) => {
+        for (const format of formats.slice(0, 3)) {
           const fps = format.framerateNumerator / format.framerateDenominator
           console.log(`    - ${format.width}x${format.height} @ ${fps}fps`)
-        })
+        }
       }
-    })
+    }
 
     console.log('\nOpening first camera...')
 
@@ -46,15 +37,15 @@ class CameraCapture {
 
     this.camera = new sdl.Camera(cameras[0], requestedSpec)
 
-    const format = this.camera.format
-    if (format.valid) {
+    const spec = this.camera.spec
+    {
       console.log(
-        `Camera format: ${format.width}x${format.height} @ ${format.fps}fps`
+        `Camera format: ${spec.width}x${spec.height} @ ${spec.fps}fps`
       )
-      console.log(`Pixel format: 0x${format.format.toString(16)}`)
+      console.log(`Pixel format: 0x${spec.format.toString(16)}`)
 
       let formatName
-      switch (format.format) {
+      switch (spec.format) {
         case sdl.constants.SDL_PIXELFORMAT_YUY2:
           formatName = 'YUY2'
           break
@@ -77,34 +68,27 @@ class CameraCapture {
           formatName = 'BGR24'
           break
         default:
-          formatName = `Unknown (0x${format.format.toString(16)})`
+          formatName = `Unknown (0x${spec.format.toString(16)})`
           break
       }
 
-      console.log(`Format name: ${formatName}`, format.format, format.toJSON())
+      console.log(`Format name: ${formatName}`, spec.format, spec.toJSON())
     }
 
     this.win = new sdl.Window(
       'Camera Capture',
-      format.width || 640,
-      format.height || 480
+      spec.width || 640,
+      spec.height || 480
     )
     this.ren = new sdl.Renderer(this.win)
 
-    let pixelFormat
-    if (Bare.platform === 'darwin') {
-      pixelFormat = sdl.constants.SDL_PIXELFORMAT_UYVY
-      console.log(`Using UYVY format for texture (camera provides NV12)`)
-    } else {
-      pixelFormat = sdl.constants.SDL_PIXELFORMAT_YUY2
-    }
-
+    const pixelFormat = spec.format
     console.log(`Creating texture with format: 0x${pixelFormat.toString(16)}`)
 
     this.tex = new sdl.Texture(
       this.ren,
-      format.width || 640,
-      format.height || 480,
+      spec.width || 640,
+      spec.height || 480,
       pixelFormat,
       sdl.constants.SDL_TEXTUREACCESS_STREAMING
     )

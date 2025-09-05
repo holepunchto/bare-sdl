@@ -66,19 +66,11 @@ test('sdl.Camera - permission state', (t) => {
   t.ok(typeof camera.isPending === 'boolean', 'isPending is boolean')
 })
 
-test('sdl.Camera - spec format status', (t) => {
+test('sdl.Camera - spec', (t) => {
   using camera = sdl.Camera.defaultCamera()
-  t.ok(camera.spec.status)
-})
-
-test('sdl.Camera - format', (t) => {
-  using camera = sdl.Camera.defaultCamera()
-  t.ok(
-    camera.format instanceof sdl.Camera.CameraFormat,
-    'returns CameraFormat instance'
-  )
-  t.ok(typeof camera.format.width === 'number', 'width is number')
-  t.ok(typeof camera.format.height === 'number', 'height is number')
+  t.ok(camera.spec instanceof sdl.Camera.CameraSpec, 'returns CameraSpec')
+  t.ok(typeof camera.spec.width === 'number', 'width is number')
+  t.ok(typeof camera.spec.height === 'number', 'height is number')
 })
 
 test('sdl.Camera - acquire frame', (t) => {
@@ -101,14 +93,14 @@ test('sdl.Camera - acquire frame', (t) => {
   }
 })
 
-test('SDLCameraFormat', (t) => {
+test('SDLCameraSpec (supported formats)', (t) => {
   using camera = sdl.Camera.defaultCamera()
   const formats = sdl.Camera.getSupportedFormats(camera.id)
-  const format = formats[0]
-  t.ok(format, 'format exists')
-  t.ok(typeof format.width === 'number', 'width is number')
-  t.ok(typeof format.height === 'number', 'height is number')
-  t.ok(typeof format.fps === 'number', 'fps is number')
+  const spec = formats[0]
+  t.ok(spec, 'spec exists')
+  t.ok(typeof spec.width === 'number', 'width is number')
+  t.ok(typeof spec.height === 'number', 'height is number')
+  t.ok(typeof spec.fps === 'number', 'fps is number')
 })
 
 test('sdl.Camera - stress test frame acquisition', (t) => {
@@ -165,9 +157,12 @@ test('sdl.Camera - memory cleanup with multiple open/close', (t) => {
 
   for (let i = 0; i < cycles; i++) {
     using camera = new sdl.Camera(deviceId)
-    t.ok(camera._handle, `cycle ${i}: camera opened`)
 
-    t.ok(camera.spec.valid, `cycle ${i}: format check successful`)
+    t.ok(camera._handle, `cycle ${i}: camera opened`)
+    t.ok(
+      typeof camera.permissionState === 'number',
+      `cycle ${i}: permission state available`
+    )
 
     camera.destroy()
     t.ok(!camera._handle, `cycle ${i}: camera handle cleared after destroy`)
