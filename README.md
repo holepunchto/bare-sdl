@@ -409,6 +409,14 @@ Gets the sample rate in Hz.
 
 **Returns**: `number`
 
+### `Camera`
+
+The `Camera` API provides functionality to access and capture from system cameras.
+
+```js
+const camera = new sdl.Camera(deviceId[, spec])
+```
+
 ### `AudioStream`
 
 The `AudioStream` API provides functionality to manage SDL audio streams for format conversion, resampling, and device binding.
@@ -418,6 +426,239 @@ const stream = new sdl.AudioStream(sourceSpec, targetSpec)
 ```
 
 Parameters:
+
+- `deviceId` (`number | object`): The camera device ID, or an object `{ id }` returned by `Camera.getCameras()`
+- `spec` (`object`, optional): Requested camera specification with the following properties:
+  - `format` (`number`): Pixel format (e.g., `constants.SDL_PIXELFORMAT_UYVY`)
+  - `colorspace` (`number`): Colorspace constant
+  - `width` (`number`): Frame width in pixels
+  - `height` (`number`): Frame height in pixels
+  - `framerateNumerator` (`number`): Framerate numerator
+  - `framerateDenominator` (`number`): Framerate denominator
+
+**Returns**: A new `Camera` instance
+
+#### Properties
+
+##### `Camera.id`
+
+Gets the camera instance ID.
+
+**Returns**: `number`
+
+##### `Camera.name`
+
+Gets the camera device name.
+
+**Returns**: `string`
+
+##### `Camera.properties`
+
+Gets device properties.
+
+**Returns**: `object`
+
+##### `Camera.permissionState`
+
+Gets the permission state for camera access: `-1` (denied), `0` (pending), `1` (approved).
+
+**Returns**: `number`
+
+##### `Camera.isApproved`
+
+Indicates if camera access is approved.
+
+**Returns**: `boolean`
+
+##### `Camera.isDenied`
+
+Indicates if camera access is denied.
+
+**Returns**: `boolean`
+
+##### `Camera.isPending`
+
+Indicates if camera access is pending.
+
+**Returns**: `boolean`
+
+##### `Camera.spec`
+
+Gets the current camera specification.
+
+**Returns**: `Camera.CameraSpec` instance
+
+#### Methods
+
+##### `Camera.acquireFrame()`
+
+Acquires a single camera frame.
+
+**Returns**: `Camera.CameraFrame` instance
+
+##### `Camera.destroy()`
+
+Closes the camera and releases resources.
+
+**Returns**: `void`
+
+#### Static Methods
+
+##### `Camera.getCameras()`
+
+Gets available camera devices.
+
+**Returns**: `object[]` - Array of `{ id, name, index }`
+
+##### `Camera.getCameraName(deviceId)`
+
+Gets the name for a camera device ID.
+
+Parameters:
+
+- `deviceId` (`number`): The camera device ID
+
+**Returns**: `string`
+
+##### `Camera.getCameraPosition(deviceId)`
+
+Gets the position for a camera device ID.
+
+Parameters:
+
+- `deviceId` (`number`): The camera device ID
+
+**Returns**: `number` (`constants.SDL_CAMERA_POSITION_FRONT_FACING` or `constants.SDL_CAMERA_POSITION_BACK_FACING`)
+
+##### `Camera.getSupportedFormats(deviceId)`
+
+Gets the supported formats for a camera device.
+
+Parameters:
+
+- `deviceId` (`number`): The camera device ID
+
+**Returns**: `object[]` - Array of format objects `{ format, colorspace, width, height, framerateNumerator, framerateDenominator, fps }`
+
+##### `Camera.defaultCamera([spec])`
+
+Creates a `Camera` for the default device, optionally with a requested spec.
+
+Parameters:
+
+- `spec` (`object`, optional): Requested specification (same fields as constructor)
+
+**Returns**: `Camera` - The default camera
+
+### `Camera.CameraSpec`
+
+Represents the current camera format selection. Typically accessed only via an existing `Camera` instance.
+
+```js
+const spec = camera.spec
+```
+
+#### Properties
+
+##### `CameraSpec.format`
+
+Gets the pixel format.
+
+**Returns**: `number`
+
+##### `CameraSpec.colorspace`
+
+Gets the colorspace.
+
+**Returns**: `number`
+
+##### `CameraSpec.width`
+
+Gets the frame width in pixels.
+
+**Returns**: `number`
+
+##### `CameraSpec.height`
+
+Gets the frame height in pixels.
+
+**Returns**: `number`
+
+##### `CameraSpec.framerateNumerator`
+
+Gets the framerate numerator.
+
+**Returns**: `number`
+
+##### `CameraSpec.framerateDenominator`
+
+Gets the framerate denominator.
+
+**Returns**: `number`
+
+##### `CameraSpec.fps`
+
+Gets the frames per second.
+
+**Returns**: `number`
+
+### `Camera.CameraFrame`
+
+Represents a single captured frame. Typically accessed only via return value of `camera.acquireFrame`.
+
+```js
+const frame = camera.acquireFrame()
+```
+
+#### Properties
+
+##### `CameraFrame.valid`
+
+Indicates if the frame is valid.
+
+**Returns**: `boolean`
+
+##### `CameraFrame.timestamp`
+
+Gets the frame timestamp.
+
+**Returns**: `number`
+
+##### `CameraFrame.width`
+
+Gets the frame width in pixels.
+
+**Returns**: `number`
+
+##### `CameraFrame.height`
+
+Gets the frame height in pixels.
+
+**Returns**: `number`
+
+##### `CameraFrame.pitch`
+
+Gets the number of bytes per row.
+
+**Returns**: `number`
+
+##### `CameraFrame.format`
+
+Gets the pixel format.
+
+**Returns**: `number`
+
+##### `CameraFrame.pixels`
+
+Gets the raw pixel data.
+
+**Returns**: `Buffer`
+
+#### Methods
+
+##### `CameraFrame.release()`
+
+# Releases the frame back to the camera.
 
 - `sourceSpec` (`object`): Source audio specification with the following properties:
   - `format` (`number`): Audio format (e.g., `constants.SDL_AUDIO_F32`)
@@ -510,12 +751,17 @@ Creates a writable stream for putting audio data.
 
 Destroys the audio stream and frees associated resources.
 
+> > > > > > > main
+
 **Returns**: `void`
 
 ## Examples
 
 - [Video playback with `bare-ffmpeg`](./examples/video-playback.js)
 - [List available audio playback and recording devices](./examples/audio-device-list.js)
+- [List available cameras](./examples/camera-list.js)
+- [Capture and playback camera stream](./examples/camera-sdl-capture-and-playback.js)
+- [Use sdl.Camera to get device list, use bare-ffmpeg to capture and process camera stream](./examples/camera-sdl-device-list-ffmpeg-capture.js)
 
 ## License
 

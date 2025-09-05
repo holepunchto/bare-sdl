@@ -2,6 +2,7 @@
 #include <js.h>
 #include <jstl.h>
 
+#include "SDL3/SDL_camera.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_audio.h>
 
@@ -56,13 +57,27 @@ typedef struct {
   bool valid;
 } bare_sdl_audio_device_format_t;
 
+typedef struct {
+  SDL_Camera *handle;
+} bare_sdl_camera_t;
+
+typedef struct {
+  SDL_CameraSpec spec;
+} bare_sdl_camera_spec_t;
+
+
+typedef struct {
+  SDL_Surface *surface;
+  uint64_t timestamp;
+} bare_sdl_camera_frame_t;
+
 static uv_once_t bare_sdl__init_guard = UV_ONCE_INIT;
 
 static void
 bare_sdl__on_init(void) {
   // Note: This is a way to prevent SDL to handle signals
   SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CAMERA);
 }
 
 // Window
@@ -123,7 +138,7 @@ bare_sdl_create_renderer(
 
   ren->handle = SDL_CreateRenderer(win->handle, nullptr);
 
-  if (win->handle == nullptr) {
+  if (ren->handle == nullptr) {
     err = js_throw_error(env, nullptr, SDL_GetError());
     assert(err == 0);
 
@@ -295,7 +310,8 @@ bare_sdl_get_event_key_scancode(
   return key->handle.scancode;
 }
 
-static void on_audio_stream_get(uv_async_t *handle);
+static void
+on_audio_stream_get(uv_async_t *handle);
 
 static void
 audio_stream_get_callback(void *userdata, SDL_AudioStream *sdl_stream, int needed_bytes, int total_bytes) {
@@ -392,8 +408,8 @@ bare_sdl_create_audio_stream(
   err = js_create_arraybuffer(env, stream, handle);
   assert(err == 0);
 
-  SDL_AudioSpec source_spec = { static_cast<SDL_AudioFormat>(source_format), source_channels, source_freq };
-  SDL_AudioSpec target_spec = { static_cast<SDL_AudioFormat>(target_format), target_channels, target_freq };
+  SDL_AudioSpec source_spec = {static_cast<SDL_AudioFormat>(source_format), source_channels, source_freq};
+  SDL_AudioSpec target_spec = {static_cast<SDL_AudioFormat>(target_format), target_channels, target_freq};
 
   stream->handle = SDL_CreateAudioStream(&source_spec, &target_spec);
   if (stream->handle == nullptr) {
@@ -436,7 +452,7 @@ bare_sdl_create_audio_stream(
 }
 
 static void
-bare_sdl__on_audio_stream_close (uv_handle_t *handle) {
+bare_sdl__on_audio_stream_close(uv_handle_t *handle) {
   auto stream = reinterpret_cast<bare_sdl_audio_stream_t *>(handle->data);
 
   if (--stream->pending_closes == 0) {
@@ -456,14 +472,14 @@ bare_sdl_destroy_audio_stream(
     SDL_SetAudioStreamGetCallback(stream->handle, nullptr, nullptr);
     stream->on_get.reset();
     stream->pending_closes++;
-    uv_close(reinterpret_cast<uv_handle_t*>(&stream->async_get), bare_sdl__on_audio_stream_close);
+    uv_close(reinterpret_cast<uv_handle_t *>(&stream->async_get), bare_sdl__on_audio_stream_close);
   }
 
   if (stream->on_put) {
     SDL_SetAudioStreamPutCallback(stream->handle, nullptr, nullptr);
     stream->on_put.reset();
     stream->pending_closes++;
-    uv_close(reinterpret_cast<uv_handle_t*>(&stream->async_put), bare_sdl__on_audio_stream_close);
+    uv_close(reinterpret_cast<uv_handle_t *>(&stream->async_put), bare_sdl__on_audio_stream_close);
   }
 }
 
@@ -598,7 +614,7 @@ bare_sdl_open_audio_device(
     spec_ptr = &spec;
   }
 
-  auto logical_device_id = SDL_OpenAudioDevice((SDL_AudioDeviceID) requested_device_id, spec_ptr);
+  auto logical_device_id = SDL_OpenAudioDevice(requested_device_id, spec_ptr);
 
   if (logical_device_id == 0) {
     err = js_throw_error(env, nullptr, SDL_GetError());
@@ -616,7 +632,7 @@ bare_sdl_close_audio_device(
   js_receiver_t,
   uint32_t device_id
 ) {
-  SDL_CloseAudioDevice((SDL_AudioDeviceID) device_id);
+  SDL_CloseAudioDevice(device_id);
 }
 
 static bool
@@ -688,7 +704,7 @@ bare_sdl_get_audio_device_list_item(
     return std::nullopt;
   }
 
-  return uint32_t(list->devices[index]);
+  return list->devices[index];
 }
 
 static std::optional<std::string>
@@ -697,8 +713,8 @@ bare_sdl_get_audio_device_name(
   js_receiver_t,
   uint32_t device_id
 ) {
-  const char *name = SDL_GetAudioDeviceName((SDL_AudioDeviceID) device_id);
-  return name;
+  const char *name = SDL_GetAudioDeviceName(device_id);
+  return name ? std::optional<std::string>(name) : std::nullopt;
 }
 
 static double
@@ -707,7 +723,7 @@ bare_sdl_get_audio_device_gain(
   js_receiver_t,
   uint32_t device_id
 ) {
-  return SDL_GetAudioDeviceGain((SDL_AudioDeviceID) device_id);
+  return SDL_GetAudioDeviceGain(device_id);
 }
 
 static void
@@ -717,7 +733,7 @@ bare_sdl_set_audio_device_gain(
   uint32_t device_id,
   double gain
 ) {
-  SDL_SetAudioDeviceGain((SDL_AudioDeviceID) device_id, (float) gain);
+  SDL_SetAudioDeviceGain(device_id, static_cast<float>(gain));
 }
 
 static js_arraybuffer_t
@@ -735,7 +751,7 @@ bare_sdl_get_audio_device_format(
   assert(err == 0);
 
   format->valid = SDL_GetAudioDeviceFormat(
-    (SDL_AudioDeviceID) device_id,
+    device_id,
     &format->spec,
     &format->sample_frames
   );
@@ -758,7 +774,7 @@ bare_sdl_get_audio_device_format_format(
   js_receiver_t,
   js_arraybuffer_span_of_t<bare_sdl_audio_device_format_t, 1> format
 ) {
-  return (uint32_t) format->spec.format;
+  return format->spec.format;
 }
 
 static int
@@ -794,7 +810,7 @@ bare_sdl_is_audio_device_physical(
   js_receiver_t,
   uint32_t deviceId
 ) {
-  return SDL_IsAudioDevicePhysical((SDL_AudioDeviceID) deviceId);
+  return SDL_IsAudioDevicePhysical(deviceId);
 }
 
 static bool
@@ -803,7 +819,7 @@ bare_sdl_is_audio_device_playback(
   js_receiver_t,
   uint32_t deviceId
 ) {
-  return SDL_IsAudioDevicePlayback((SDL_AudioDeviceID) deviceId);
+  return SDL_IsAudioDevicePlayback(deviceId);
 }
 
 static bool
@@ -812,7 +828,355 @@ bare_sdl_is_audio_device_paused(
   js_receiver_t,
   uint32_t deviceId
 ) {
-  return SDL_AudioDevicePaused((SDL_AudioDeviceID) deviceId);
+  return SDL_AudioDevicePaused(deviceId);
+}
+
+static std::vector<uint32_t>
+bare_sdl_get_cameras(
+  js_env_t *env,
+  js_receiver_t
+) {
+  int err;
+
+  int count = 0;
+  SDL_CameraID *devices = SDL_GetCameras(&count);
+  if (devices == nullptr) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  std::vector<uint32_t> list;
+  for (int i = 0; i < count; i++) {
+    list.push_back(devices[i]);
+  }
+
+  SDL_free(devices);
+
+  return list;
+}
+
+static std::optional<std::string>
+bare_sdl_get_camera_name(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  const char *name = SDL_GetCameraName(device_id);
+  return name ? std::optional<std::string>(name) : std::nullopt;
+}
+
+static uint32_t
+bare_sdl_get_camera_position(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  return SDL_GetCameraPosition(device_id);
+}
+
+static std::vector<js_arraybuffer_t>
+bare_sdl_get_camera_supported_formats(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id
+) {
+  int err;
+
+  int count = 0;
+  SDL_CameraSpec **specs = SDL_GetCameraSupportedFormats(device_id, &count);
+  if (specs == nullptr) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  std::vector<js_arraybuffer_t> list;
+  for (int i = 0; i < count; i++) {
+    js_arraybuffer_t handle;
+    bare_sdl_camera_spec_t *spec;
+    err = js_create_arraybuffer(env, spec, handle);
+    assert(err == 0);
+
+    spec->spec = *specs[i];
+    list.push_back(handle);
+  }
+
+  SDL_free(specs);
+
+  return list;
+}
+
+
+static js_arraybuffer_t
+bare_sdl_open_camera(
+  js_env_t *env,
+  js_receiver_t,
+  uint32_t device_id,
+  std::optional<uint32_t> format,
+  std::optional<uint32_t> colorspace,
+  std::optional<int> width,
+  std::optional<int> height,
+  std::optional<int> framerate_numerator,
+  std::optional<int> framerate_denominator
+) {
+  SDL_CameraSpec spec;
+  SDL_CameraSpec *spec_ptr = nullptr;
+
+  if (format.has_value() && width.has_value() && height.has_value()) {
+    spec.format = static_cast<SDL_PixelFormat>(format.value());
+    spec.colorspace = static_cast<SDL_Colorspace>(colorspace.value_or(0));
+    spec.width = width.value();
+    spec.height = height.value();
+    spec.framerate_numerator = framerate_numerator.value_or(30);
+    spec.framerate_denominator = framerate_denominator.value_or(1);
+    spec_ptr = &spec;
+  }
+
+  int err;
+  js_arraybuffer_t handle;
+  bare_sdl_camera_t *cam;
+  err = js_create_arraybuffer(env, cam, handle);
+  assert(err == 0);
+
+  cam->handle = SDL_OpenCamera(device_id, spec_ptr);
+  if (cam->handle == nullptr) {
+    err = js_throw_error(env, nullptr, SDL_GetError());
+    assert(err == 0);
+
+    throw js_pending_exception;
+  }
+
+  return handle;
+}
+
+static void
+bare_sdl_close_camera(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  if (cam->handle) {
+    SDL_CloseCamera(cam->handle);
+    cam->handle = nullptr;
+  }
+}
+
+static int
+bare_sdl_get_camera_permission_state(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  return SDL_GetCameraPermissionState(cam->handle);
+}
+
+static uint32_t
+bare_sdl_get_camera_id(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  return SDL_GetCameraID(cam->handle);
+}
+
+static uint32_t
+bare_sdl_get_camera_properties(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  return SDL_GetCameraProperties(cam->handle);
+}
+
+static js_arraybuffer_t
+bare_sdl_get_camera_format(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  int err;
+
+  js_arraybuffer_t handle;
+  bare_sdl_camera_spec_t *spec;
+  err = js_create_arraybuffer(env, spec, handle);
+  assert(err == 0);
+
+  SDL_GetCameraFormat(cam->handle, &spec->spec);
+  return handle;
+}
+
+static uint32_t
+bare_sdl_get_camera_spec_format(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.format;
+}
+
+static uint32_t
+bare_sdl_get_camera_spec_colorspace(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.colorspace;
+}
+
+static int
+bare_sdl_get_camera_spec_width(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.width;
+}
+
+static int
+bare_sdl_get_camera_spec_height(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.height;
+}
+
+static int
+bare_sdl_get_camera_spec_framerate_numerator(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.framerate_numerator;
+}
+
+static int
+bare_sdl_get_camera_spec_framerate_denominator(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_spec_t, 1> spec
+) {
+  return spec->spec.framerate_denominator;
+}
+
+static js_arraybuffer_t
+bare_sdl_acquire_camera_frame(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam
+) {
+  int err;
+
+  js_arraybuffer_t handle;
+
+  bare_sdl_camera_frame_t *frame;
+  err = js_create_arraybuffer(env, frame, handle);
+  assert(err == 0);
+
+  frame->timestamp = 0;
+  Uint64 timestamp_ns = 0;
+  frame->surface = SDL_AcquireCameraFrame(cam->handle, &timestamp_ns);
+
+  if (frame->surface) {
+    frame->timestamp = timestamp_ns;
+  }
+
+  return handle;
+}
+
+static void
+bare_sdl_release_camera_frame(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_t, 1> cam,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  if (frame->surface) {
+    SDL_ReleaseCameraFrame(cam->handle, frame->surface);
+    frame->surface = nullptr;
+    frame->timestamp = 0;
+  }
+}
+
+static bool
+bare_sdl_get_camera_frame_valid(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->surface != nullptr;
+}
+
+static uint64_t
+bare_sdl_get_camera_frame_timestamp(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->timestamp;
+}
+
+static std::optional<js_arraybuffer_t>
+bare_sdl_get_camera_frame_pixels(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  if (!frame->surface) {
+    return std::nullopt;
+  }
+
+  int err;
+
+  size_t pixel_size = static_cast<size_t>(frame->surface->pitch) * static_cast<size_t>(frame->surface->h);
+
+  js_arraybuffer_t handle;
+  uint8_t *data;
+  err = js_create_arraybuffer(env, pixel_size, data, handle);
+  assert(err == 0);
+
+  memcpy(data, frame->surface->pixels, pixel_size);
+
+  return handle;
+}
+
+static int
+bare_sdl_get_camera_frame_width(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->surface ? frame->surface->w : 0;
+}
+
+static int
+bare_sdl_get_camera_frame_height(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->surface ? frame->surface->h : 0;
+}
+
+static int
+bare_sdl_get_camera_frame_pitch(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->surface ? frame->surface->pitch : 0;
+}
+
+static uint32_t
+bare_sdl_get_camera_frame_format(
+  js_env_t *env,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_camera_frame_t, 1> frame
+) {
+  return frame->surface ? frame->surface->format : 0;
 }
 
 // Exports
@@ -992,6 +1356,10 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V(SDL_EVENT_MOUSE_WHEEL)
   V(SDL_EVENT_MOUSE_ADDED)
   V(SDL_EVENT_MOUSE_REMOVED)
+  V(SDL_EVENT_CAMERA_DEVICE_ADDED)
+  V(SDL_EVENT_CAMERA_DEVICE_REMOVED)
+  V(SDL_EVENT_CAMERA_DEVICE_APPROVED)
+  V(SDL_EVENT_CAMERA_DEVICE_DENIED)
 
   V(SDL_SCANCODE_UNKNOWN)
   V(SDL_SCANCODE_A)
@@ -1257,6 +1625,11 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
 
   V(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK)
   V(SDL_AUDIO_DEVICE_DEFAULT_RECORDING)
+
+  V(SDL_CAMERA_POSITION_UNKNOWN)
+  V(SDL_CAMERA_POSITION_FRONT_FACING)
+  V(SDL_CAMERA_POSITION_BACK_FACING)
+
 #undef V
 
 #define V(name, function) \
@@ -1301,6 +1674,33 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("isAudioDevicePhysical", bare_sdl_is_audio_device_physical)
   V("isAudioDevicePlayback", bare_sdl_is_audio_device_playback)
   V("isAudioDevicePaused", bare_sdl_is_audio_device_paused)
+
+  V("getCameras", bare_sdl_get_cameras)
+  V("getCameraName", bare_sdl_get_camera_name)
+  V("getCameraPosition", bare_sdl_get_camera_position)
+  V("getCameraSupportedFormats", bare_sdl_get_camera_supported_formats)
+  V("openCamera", bare_sdl_open_camera)
+  V("closeCamera", bare_sdl_close_camera)
+  V("getCameraPermissionState", bare_sdl_get_camera_permission_state)
+  V("getCameraId", bare_sdl_get_camera_id)
+  V("getCameraProperties", bare_sdl_get_camera_properties)
+  V("getCameraFormat", bare_sdl_get_camera_format)
+  V("getCameraSpecFormat", bare_sdl_get_camera_spec_format)
+  V("getCameraSpecColorspace", bare_sdl_get_camera_spec_colorspace)
+  V("getCameraSpecWidth", bare_sdl_get_camera_spec_width)
+  V("getCameraSpecHeight", bare_sdl_get_camera_spec_height)
+  V("getCameraSpecFramerateNumerator", bare_sdl_get_camera_spec_framerate_numerator)
+  V("getCameraSpecFramerateDenominator", bare_sdl_get_camera_spec_framerate_denominator)
+  V("acquireCameraFrame", bare_sdl_acquire_camera_frame)
+  V("releaseCameraFrame", bare_sdl_release_camera_frame)
+  V("getCameraFrameValid", bare_sdl_get_camera_frame_valid)
+  V("getCameraFrameTimestamp", bare_sdl_get_camera_frame_timestamp)
+  V("getCameraFramePixels", bare_sdl_get_camera_frame_pixels)
+  V("getCameraFrameWidth", bare_sdl_get_camera_frame_width)
+  V("getCameraFrameHeight", bare_sdl_get_camera_frame_height)
+  V("getCameraFramePitch", bare_sdl_get_camera_frame_pitch)
+  V("getCameraFrameFormat", bare_sdl_get_camera_frame_format)
+
   V("bindAudioStream", bare_sdl_bind_audio_stream)
   V("unbindAudioStream", bare_sdl_unbind_audio_stream)
   V("createAudioStream", bare_sdl_create_audio_stream)
