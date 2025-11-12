@@ -38,6 +38,6 @@
     "cmake-fetch": "^1.4.7",
     "cmake-harden": "^1.1.2",
     "prettier": "^3.6.2",
-    "prettier-config-standard": "^7.0.0"
+    "prettier-config-holepunch": "^2.0.0"
   }
 }

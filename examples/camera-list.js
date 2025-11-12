@@ -51,9 +51,7 @@ cameras.forEach((deviceId, index) => {
     })
 
     sortedResolutions.slice(0, 5).forEach(([resolution, configs]) => {
-      const fpsValues = configs
-        .map((c) => c.fps)
-        .filter((v, i, a) => a.indexOf(v) === i)
+      const fpsValues = configs.map((c) => c.fps).filter((v, i, a) => a.indexOf(v) === i)
       const fpsStr = fpsValues
         .sort((a, b) => b - a)
         .map((f) => `${f}`)
@@ -62,9 +60,7 @@ cameras.forEach((deviceId, index) => {
     })
 
     if (sortedResolutions.length > 5) {
-      console.log(
-        `    ... and ${sortedResolutions.length - 5} more resolutions`
-      )
+      console.log(`    ... and ${sortedResolutions.length - 5} more resolutions`)
     }
   }
 

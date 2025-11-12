@@ -52,9 +52,7 @@ const resampler = new ffmpeg.Resampler(
 
 const frameSize = 960
 const inputFrame = new ffmpeg.Frame()
-inputFrame.nbSamples = Math.floor(
-  (frameSize * mic.spec.freq) / encoder.sampleRate
-)
+inputFrame.nbSamples = Math.floor((frameSize * mic.spec.freq) / encoder.sampleRate)
 inputFrame.channelLayout =
   mic.spec.channels === 1
     ? ffmpeg.constants.channelLayouts.MONO
@@ -104,10 +102,7 @@ const audioStream = new sdl.AudioStream(mic.spec, targetSpec, {
     const bytesRead = audioStream.get(pcmBuffer)
 
     if (bytesRead > 0) {
-      audioBuffer = Buffer.concat([
-        audioBuffer,
-        pcmBuffer.subarray(0, bytesRead)
-      ])
+      audioBuffer = Buffer.concat([audioBuffer, pcmBuffer.subarray(0, bytesRead)])
 
       while (audioBuffer.length >= bytesNeeded) {
         const frameData = audioBuffer.subarray(0, bytesNeeded)

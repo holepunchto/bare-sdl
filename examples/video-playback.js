@@ -52,15 +52,9 @@ if (Bare.platform === 'win32') {
   options.set('rtbufsize', '100M')
 }
 
-const inputFormatContext = new ffmpeg.InputFormatContext(
-  new ffmpeg.InputFormat(),
-  options,
-  url
-)
+const inputFormatContext = new ffmpeg.InputFormatContext(new ffmpeg.InputFormat(), options, url)
 
-const bestStream = inputFormatContext.getBestStream(
-  ffmpeg.constants.mediaTypes.VIDEO
-)
+const bestStream = inputFormatContext.getBestStream(ffmpeg.constants.mediaTypes.VIDEO)
 if (!bestStream) process.exit(1)
 
 const decoder = bestStream.decoder()
@@ -97,11 +91,7 @@ rgb.height = decoder.height
 rgb.pixelFormat = ffmpeg.constants.pixelFormats.RGB24
 rgb.alloc()
 
-const image = new ffmpeg.Image(
-  ffmpeg.constants.pixelFormats.RGB24,
-  rgb.width,
-  rgb.height
-)
+const image = new ffmpeg.Image(ffmpeg.constants.pixelFormats.RGB24, rgb.width, rgb.height)
 image.fill(rgb)
 
 const toYUV = new ffmpeg.Scaler(

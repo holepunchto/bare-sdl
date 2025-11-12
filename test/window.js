@@ -9,12 +9,7 @@ test('it should expose a window class', (t) => {
 })
 
 test('it should be possible to pass a flag', (t) => {
-  const win = new sdl.Window(
-    'Window',
-    100,
-    100,
-    sdl.constants.SDL_WINDOW_FULLSCREEN
-  )
+  const win = new sdl.Window('Window', 100, 100, sdl.constants.SDL_WINDOW_FULLSCREEN)
   t.teardown(() => win.destroy())
 
   t.ok(win)

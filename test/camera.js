@@ -34,14 +34,8 @@ test('sdl.Camera - getSupportedFormats', (t) => {
     t.ok(typeof format.format === 'number', 'format is a number')
     t.ok(typeof format.width === 'number', 'width is a number')
     t.ok(typeof format.height === 'number', 'height is a number')
-    t.ok(
-      typeof format.framerateNumerator === 'number',
-      'framerateNumerator is a number'
-    )
-    t.ok(
-      typeof format.framerateDenominator === 'number',
-      'framerateDenominator is a number'
-    )
+    t.ok(typeof format.framerateNumerator === 'number', 'framerateNumerator is a number')
+    t.ok(typeof format.framerateDenominator === 'number', 'framerateDenominator is a number')
   }
 })
 
@@ -159,10 +153,7 @@ test('sdl.Camera - memory cleanup with multiple open/close', (t) => {
     using camera = new sdl.Camera(deviceId)
 
     t.ok(camera._handle, `cycle ${i}: camera opened`)
-    t.ok(
-      typeof camera.permissionState === 'number',
-      `cycle ${i}: permission state available`
-    )
+    t.ok(typeof camera.permissionState === 'number', `cycle ${i}: permission state available`)
 
     camera.destroy()
     t.ok(!camera._handle, `cycle ${i}: camera handle cleared after destroy`)
