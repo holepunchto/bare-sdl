@@ -1,10 +1,6 @@
 const test = require('brittle')
 const sdl = require('..')
-const {
-  hasRecordingDevice,
-  hasPlaybackDevice,
-  generateTone
-} = require('./helpers/index')
+const { hasRecordingDevice, hasPlaybackDevice, generateTone } = require('./helpers/index')
 
 test('it should expose an AudioStream class', function (t) {
   const stream = new sdl.AudioStream(
@@ -15,16 +11,8 @@ test('it should expose an AudioStream class', function (t) {
 
   t.ok(stream, 'stream created successfully')
   t.ok(stream._handle, 'stream has handle')
-  t.is(
-    stream.source.format,
-    sdl.constants.SDL_AUDIO_F32,
-    'source format stored'
-  )
-  t.is(
-    stream.target.format,
-    sdl.constants.SDL_AUDIO_S16,
-    'target format stored'
-  )
+  t.is(stream.source.format, sdl.constants.SDL_AUDIO_F32, 'source format stored')
+  t.is(stream.target.format, sdl.constants.SDL_AUDIO_S16, 'target format stored')
 })
 
 test('AudioStream should support put/get/clear operations', function (t) {
@@ -304,9 +292,7 @@ test('AudioStream should support continuous playback', function (t) {
 
       for (let i = 0; i < samples; i++) {
         const sample =
-          Math.sin(
-            (2 * Math.PI * frequency * (i + count * samples)) / sampleRate
-          ) * 0.1
+          Math.sin((2 * Math.PI * frequency * (i + count * samples)) / sampleRate) * 0.1
         buffer[i * 2] = sample
         buffer[i * 2 + 1] = sample
       }
@@ -315,10 +301,7 @@ test('AudioStream should support continuous playback', function (t) {
 
       if (count >= limit) {
         t.ok(count > 0, 'callback was called')
-        t.ok(
-          count > 1,
-          'callback was called multiple times for continuous playback'
-        )
+        t.ok(count > 1, 'callback was called multiple times for continuous playback')
 
         device.unbindStream(stream)
       }

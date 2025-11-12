@@ -20,15 +20,9 @@ class CameraFFmpegBridge {
 
     const formats = sdl.Camera.getSupportedFormats(cameras[selectedIndex])
     const targetFormat = this.selectBestFormat(formats)
-    console.log(
-      `Format: ${targetFormat.width}x${targetFormat.height} @ ${targetFormat.fps}fps`
-    )
+    console.log(`Format: ${targetFormat.width}x${targetFormat.height} @ ${targetFormat.fps}fps`)
 
-    const { url, options } = this.createFFmpegConfig(
-      cameraName,
-      selectedIndex,
-      targetFormat
-    )
+    const { url, options } = this.createFFmpegConfig(cameraName, selectedIndex, targetFormat)
 
     this.initFFmpeg(url, options)
     this.playback = new Playback(targetFormat.width, targetFormat.height)
@@ -72,15 +66,9 @@ class CameraFFmpegBridge {
 
   initFFmpeg(url, options) {
     const inputFormat = new ffmpeg.InputFormat()
-    this.inputFormatContext = new ffmpeg.InputFormatContext(
-      inputFormat,
-      options,
-      url
-    )
+    this.inputFormatContext = new ffmpeg.InputFormatContext(inputFormat, options, url)
 
-    const bestStream = this.inputFormatContext.getBestStream(
-      ffmpeg.constants.mediaTypes.VIDEO
-    )
+    const bestStream = this.inputFormatContext.getBestStream(ffmpeg.constants.mediaTypes.VIDEO)
     if (!bestStream) {
       throw new Error('No video stream found')
     }
@@ -160,9 +148,7 @@ class CameraFFmpegBridge {
 
         const now = Date.now()
         if (now - lastTime > 1000) {
-          console.log(
-            `FPS: ${(frameCount / ((now - lastTime) / 1000)).toFixed(1)}`
-          )
+          console.log(`FPS: ${(frameCount / ((now - lastTime) / 1000)).toFixed(1)}`)
           frameCount = 0
           lastTime = now
         }
@@ -179,11 +165,7 @@ class CameraFFmpegBridge {
 
 class Playback {
   constructor(width, height) {
-    this.win = new sdl.Window(
-      'Camera (SDL device list, FFmpeg Capture)',
-      width,
-      height
-    )
+    this.win = new sdl.Window('Camera (SDL device list, FFmpeg Capture)', width, height)
     this.ren = new sdl.Renderer(this.win)
     this.tex = new sdl.Texture(
       this.ren,

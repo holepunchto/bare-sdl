@@ -39,9 +39,7 @@ class CameraCapture {
 
     const spec = this.camera.spec
     {
-      console.log(
-        `Camera format: ${spec.width}x${spec.height} @ ${spec.fps}fps`
-      )
+      console.log(`Camera format: ${spec.width}x${spec.height} @ ${spec.fps}fps`)
       console.log(`Pixel format: 0x${spec.format.toString(16)}`)
 
       let formatName
@@ -75,11 +73,7 @@ class CameraCapture {
       console.log(`Format name: ${formatName}`, spec.format, spec.toJSON())
     }
 
-    this.win = new sdl.Window(
-      'Camera Capture',
-      spec.width || 640,
-      spec.height || 480
-    )
+    this.win = new sdl.Window('Camera Capture', spec.width || 640, spec.height || 480)
     this.ren = new sdl.Renderer(this.win)
 
     const pixelFormat = spec.format
@@ -136,9 +130,7 @@ class CameraCapture {
       const now = Date.now()
       if (now - this.lastFrameTime > 1000) {
         const fps = this.frameCount / ((now - this.lastFrameTime) / 1000)
-        console.log(
-          `Capturing: ${frame.width}x${frame.height}, ${fps.toFixed(1)} fps`
-        )
+        console.log(`Capturing: ${frame.width}x${frame.height}, ${fps.toFixed(1)} fps`)
         this.frameCount = 0
         this.lastFrameTime = now
       }
