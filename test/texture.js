@@ -68,3 +68,28 @@ test('Texture class should expose an update method', (t) => {
 
   t.ok(typeof tex.update(buf, 300) == 'boolean')
 })
+
+test('Texture.update accepts a sub-region Rect', (t) => {
+  const width = 100
+  const height = 10
+  const pitch = 10 * 3 // RGB24, only 10px wide region
+  const buf = Buffer.alloc(pitch * height)
+
+  const win = new sdl.Window('test', width, height)
+  t.teardown(() => win.destroy())
+
+  const ren = new sdl.Renderer(win)
+  t.teardown(() => ren.destroy())
+
+  const tex = new sdl.Texture(
+    ren,
+    width,
+    height,
+    sdl.constants.SDL_PIXELFORMAT_RGB24,
+    sdl.constants.SDL_TEXTUREACCESS_STREAMING
+  )
+  t.teardown(() => tex.destroy())
+
+  const rect = new sdl.Rect(0, 0, 10, height)
+  t.ok(typeof tex.update(buf, pitch, rect) == 'boolean')
+})

@@ -22,6 +22,14 @@ typedef struct {
 } bare_sdl_texture_t;
 
 typedef struct {
+  SDL_Rect handle;
+} bare_sdl_rect_t;
+
+typedef struct {
+  SDL_FRect handle;
+} bare_sdl_frect_t;
+
+typedef struct {
   SDL_Event handle;
 } bare_sdl_event_t;
 
@@ -180,10 +188,13 @@ bare_sdl_texture_render(
   js_env_t *env,
   js_receiver_t,
   js_arraybuffer_span_of_t<bare_sdl_renderer_t, 1> ren,
-  js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex
+  js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex,
+  std::optional<js_arraybuffer_span_of_t<bare_sdl_frect_t, 1>> src,
+  std::optional<js_arraybuffer_span_of_t<bare_sdl_frect_t, 1>> dst
 ) {
-  // TODO: add source and destination SDL_Rect
-  return SDL_RenderTexture(ren->handle, tex->handle, nullptr, nullptr);
+  const SDL_FRect *src_r = src.has_value() ? &src.value()->handle : nullptr;
+  const SDL_FRect *dst_r = dst.has_value() ? &dst.value()->handle : nullptr;
+  return SDL_RenderTexture(ren->handle, tex->handle, src_r, dst_r);
 }
 
 // Texture
@@ -240,10 +251,133 @@ bare_sdl_update_texture(
   js_arraybuffer_span_of_t<bare_sdl_texture_t, 1> tex,
   js_arraybuffer_span_t buf,
   uint32_t buf_offset,
-  int pitch
+  int pitch,
+  std::optional<js_arraybuffer_span_of_t<bare_sdl_rect_t, 1>> rect
 ) {
-  // TODO: add SDL_Rect
-  return SDL_UpdateTexture(tex->handle, nullptr, &buf[buf_offset], pitch);
+  const SDL_Rect *r = rect.has_value() ? &rect.value()->handle : nullptr;
+  return SDL_UpdateTexture(tex->handle, r, &buf[buf_offset], pitch);
+}
+
+// Rect
+
+static js_arraybuffer_t
+bare_sdl_create_rect(
+  js_env_t *env,
+  js_receiver_t,
+  int x,
+  int y,
+  int w,
+  int h
+) {
+  js_arraybuffer_t handle;
+
+  bare_sdl_rect_t *r;
+  int err = js_create_arraybuffer(env, r, handle);
+  assert(err == 0);
+
+  r->handle.x = x;
+  r->handle.y = y;
+  r->handle.w = w;
+  r->handle.h = h;
+
+  return handle;
+}
+
+static void
+bare_sdl_set_rect(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_rect_t, 1> r,
+  int x,
+  int y,
+  int w,
+  int h
+) {
+  r->handle.x = x;
+  r->handle.y = y;
+  r->handle.w = w;
+  r->handle.h = h;
+}
+
+static int
+bare_sdl_get_rect_x(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_rect_t, 1> r) {
+  return r->handle.x;
+}
+
+static int
+bare_sdl_get_rect_y(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_rect_t, 1> r) {
+  return r->handle.y;
+}
+
+static int
+bare_sdl_get_rect_w(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_rect_t, 1> r) {
+  return r->handle.w;
+}
+
+static int
+bare_sdl_get_rect_h(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_rect_t, 1> r) {
+  return r->handle.h;
+}
+
+// FRect
+
+static js_arraybuffer_t
+bare_sdl_create_frect(
+  js_env_t *env,
+  js_receiver_t,
+  double x,
+  double y,
+  double w,
+  double h
+) {
+  js_arraybuffer_t handle;
+
+  bare_sdl_frect_t *r;
+  int err = js_create_arraybuffer(env, r, handle);
+  assert(err == 0);
+
+  r->handle.x = static_cast<float>(x);
+  r->handle.y = static_cast<float>(y);
+  r->handle.w = static_cast<float>(w);
+  r->handle.h = static_cast<float>(h);
+
+  return handle;
+}
+
+static void
+bare_sdl_set_frect(
+  js_env_t *,
+  js_receiver_t,
+  js_arraybuffer_span_of_t<bare_sdl_frect_t, 1> r,
+  double x,
+  double y,
+  double w,
+  double h
+) {
+  r->handle.x = static_cast<float>(x);
+  r->handle.y = static_cast<float>(y);
+  r->handle.w = static_cast<float>(w);
+  r->handle.h = static_cast<float>(h);
+}
+
+static double
+bare_sdl_get_frect_x(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_frect_t, 1> r) {
+  return r->handle.x;
+}
+
+static double
+bare_sdl_get_frect_y(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_frect_t, 1> r) {
+  return r->handle.y;
+}
+
+static double
+bare_sdl_get_frect_w(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_frect_t, 1> r) {
+  return r->handle.w;
+}
+
+static double
+bare_sdl_get_frect_h(js_env_t *, js_receiver_t, js_arraybuffer_span_of_t<bare_sdl_frect_t, 1> r) {
+  return r->handle.h;
 }
 
 // Events
@@ -1648,6 +1782,20 @@ bare_sdl_exports(js_env_t *env, js_value_t *exports) {
   V("createTexture", bare_sdl_create_texture)
   V("destroyTexture", bare_sdl_destroy_texture)
   V("updateTexture", bare_sdl_update_texture)
+
+  V("createRect", bare_sdl_create_rect)
+  V("setRect", bare_sdl_set_rect)
+  V("getRectX", bare_sdl_get_rect_x)
+  V("getRectY", bare_sdl_get_rect_y)
+  V("getRectW", bare_sdl_get_rect_w)
+  V("getRectH", bare_sdl_get_rect_h)
+
+  V("createFRect", bare_sdl_create_frect)
+  V("setFRect", bare_sdl_set_frect)
+  V("getFRectX", bare_sdl_get_frect_x)
+  V("getFRectY", bare_sdl_get_frect_y)
+  V("getFRectW", bare_sdl_get_frect_w)
+  V("getFRectH", bare_sdl_get_frect_h)
 
   V("poll", bare_sdl_poll)
   V("createEvent", bare_sdl_create_event)

@@ -70,13 +70,15 @@ Clears the renderer with the current draw color.
 
 **Returns**: `boolean` indicating success
 
-##### `Renderer.texture(texture)`
+##### `Renderer.texture(texture[, src[, dst]])`
 
 Renders a texture to the renderer.
 
 Parameters:
 
 - `texture` (`sdl.Texture`): The texture to render
+- `src` (`sdl.Rect.F`, optional): Source sub-region of the texture to copy from. Defaults to the entire texture.
+- `dst` (`sdl.Rect.F`, optional): Destination region in the render target to draw into. Defaults to the entire render target.
 
 **Returns**: `boolean` indicating success
 
@@ -114,7 +116,7 @@ Available pixel formats and texture access flags are exposed through the `consta
 
 #### Methods
 
-##### `Texture.update(buffer, pitch)`
+##### `Texture.update(buffer, pitch[, rect])`
 
 Updates the texture with new pixel data.
 
@@ -122,6 +124,7 @@ Parameters:
 
 - `buffer` (`Buffer`): The pixel data buffer
 - `pitch` (`number`): The number of bytes per row
+- `rect` (`sdl.Rect`, optional): Sub-region of the texture to update. Defaults to the entire texture.
 
 **Returns**: `boolean` indicating success
 
@@ -130,6 +133,49 @@ Parameters:
 Destroy `Texture` and associated resources.
 
 **Returns**: `void`
+
+### `Rect`
+
+The `Rect` API represents an integer rectangle (`SDL_Rect`). Used by `Texture.update` to update a sub-region of a texture.
+
+```js
+const rect = new sdl.Rect(x, y, w, h)
+```
+
+Parameters:
+
+- `x` (`number`, optional): X coordinate. Defaults to 0.
+- `y` (`number`, optional): Y coordinate. Defaults to 0.
+- `w` (`number`, optional): Width. Defaults to 0.
+- `h` (`number`, optional): Height. Defaults to 0.
+
+**Returns**: A new `Rect` instance.
+
+#### Properties
+
+##### `Rect.x`, `Rect.y`, `Rect.w`, `Rect.h`
+
+Read the current values.
+
+**Returns**: `number`
+
+#### Methods
+
+##### `Rect.set(x, y, w, h)`
+
+Updates all four fields in place without allocating a new buffer. Useful for hot loops.
+
+**Returns**: `void`
+
+### `Rect.F`
+
+Float version of `Rect` (`SDL_FRect`). Used by `Renderer.texture` and all SDL3 render-side calls.
+
+```js
+const rect = new sdl.Rect.F(x, y, w, h)
+```
+
+Same parameters, properties, and `set()` method as `Rect`, but `x`, `y`, `w`, `h` are floats.
 
 ### `Event`
 

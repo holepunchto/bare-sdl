@@ -43,3 +43,18 @@ test('Renderer class should expose a texture method', (t) => {
 
   t.ok(typeof ren.texture(tex) == 'boolean')
 })
+
+test('Renderer.texture accepts src and dst FRects', (t) => {
+  const win = new sdl.Window('test', 100, 100)
+  t.teardown(() => win.destroy())
+
+  const ren = new sdl.Renderer(win)
+  t.teardown(() => ren.destroy())
+
+  const tex = new sdl.Texture(ren, 100, 100)
+  t.teardown(() => tex.destroy())
+
+  const src = new sdl.Rect.F(0, 0, 50, 50)
+  const dst = new sdl.Rect.F(25, 25, 50, 50)
+  t.ok(typeof ren.texture(tex, src, dst) == 'boolean')
+})
