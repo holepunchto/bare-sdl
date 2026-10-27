@@ -143,12 +143,14 @@ function decode(buffer) {
 }
 
 const loop = setInterval(() => {
-  let event
+  let event = playback.poll()
 
-  while ((event = playback.poll())) {
+  while (event) {
     if (event.type === sdl.constants.SDL_EVENT_QUIT) {
       clearInterval(loop)
     }
+
+    event = playback.poll()
   }
 
   const packet = new ffmpeg.Packet()
