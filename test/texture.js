@@ -66,7 +66,7 @@ test('Texture class should expose an update method', (t) => {
   )
   t.teardown(() => tex.destroy())
 
-  t.ok(typeof tex.update(buf, 300) == 'boolean')
+  t.ok(typeof tex.update(buf, 300) === 'boolean')
 })
 
 test('Texture.update accepts a sub-region Rect', (t) => {
@@ -91,5 +91,5 @@ test('Texture.update accepts a sub-region Rect', (t) => {
   t.teardown(() => tex.destroy())
 
   const rect = new sdl.Rect(0, 0, 10, height)
-  t.ok(typeof tex.update(buf, pitch, rect) == 'boolean')
+  t.ok(typeof tex.update(buf, pitch, rect) === 'boolean')
 })

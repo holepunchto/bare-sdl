@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(bare_sdl C CXX)
 
-fetch_package("github:holepunchto/libjstl#096669a")
+fetch_package("github:holepunchto/libjstl#1890183")
 
 set(SDL_STATIC ON CACHE BOOL "Build a static version of SDL" FORCE)
 

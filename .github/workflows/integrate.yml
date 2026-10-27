@@ -1,4 +1,4 @@
-name: Test
+name: Integrate
 on:
   push:
     branches:
@@ -9,6 +9,17 @@ on:
 permissions:
   contents: read
 jobs:
+  security:
+    runs-on: ubuntu-latest
+    name: Security
+    steps:
+      - uses: holepunchto/actions/security-base@v1
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: holepunchto/actions/node-base@v1
+      - run: npm run lint
   test:
     strategy:
       matrix:
@@ -23,12 +34,9 @@ jobs:
             platform: win32
             arch: x64
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.tags }}
+    name: Test / ${{ matrix.platform }}-${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+      - uses: holepunchto/actions/bare-base@v1
       - uses: ./.github/actions/virtual-audio-device
         with:
           platform: ${{ matrix.platform }}
@@ -48,11 +56,11 @@ jobs:
         if: ${{ matrix.platform == 'linux' }}
       - run: choco install vb-cable -y
         if: ${{ matrix.platform == 'win32' }}
-      - run: npm install -g bare-runtime bare-make
-      - run: npm install
-      - run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --debug ${{ matrix.flags }}
-      - run: bare-make build
-      - run: bare-make install
+      - uses: holepunchto/actions/compile-prebuilds@v1
+        with:
+          platform: ${{ matrix.platform }}
+          arch: ${{ matrix.arch }}
+          flags: --debug ${{ matrix.flags }}
       - run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" npm test
         if: ${{ matrix.platform == 'linux' }}
       - run: npm test
